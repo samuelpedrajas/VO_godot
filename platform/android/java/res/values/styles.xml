@@ -22,4 +22,8 @@
         <item name="android:background">@android:color/background_dark</item>
     </style>
 
+    <style name="LauncherTheme" parent="@android:Theme.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
 </resources>

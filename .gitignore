@@ -312,3 +312,4 @@ platform/windows/godot_res.res
 
 # Scons progress indicator
 .scons_node_count
+/modules/
