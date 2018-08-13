@@ -219,6 +219,9 @@ void ScriptEditorQuickOpen::_notification(int p_what) {
 		case NOTIFICATION_ENTER_TREE: {
 
 			connect("confirmed", this, "_confirmed");
+
+			search_box->set_right_icon(get_icon("Search", "EditorIcons"));
+			search_box->set_clear_button_enabled(true);
 		} break;
 	}
 }
@@ -2402,26 +2405,25 @@ void ScriptEditor::_make_script_list_context_menu() {
 	if (se) {
 		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/save"), FILE_SAVE);
 		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/save_as"), FILE_SAVE_AS);
-		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_file"), FILE_CLOSE);
-		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_all"), CLOSE_ALL);
-		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_other_tabs"), CLOSE_OTHER_TABS);
-		context_menu->add_separator();
-		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/copy_path"), FILE_COPY_PATH);
-		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/show_in_file_system"), SHOW_IN_FILE_SYSTEM);
-
+	}
+	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_file"), FILE_CLOSE);
+	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_all"), CLOSE_ALL);
+	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_other_tabs"), CLOSE_OTHER_TABS);
+	context_menu->add_separator();
+	if (se) {
 		Ref<Script> scr = se->get_edited_resource();
 		if (scr != NULL) {
 			context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/reload_script_soft"), FILE_TOOL_RELOAD_SOFT);
 			if (!scr.is_null() && scr->is_tool()) {
-				context_menu->add_separator();
 				context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/run_file"), FILE_RUN);
+				context_menu->add_separator();
 			}
 		}
-	} else {
-		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/close_file"), FILE_CLOSE);
+		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/copy_path"), FILE_COPY_PATH);
+		context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/show_in_file_system"), SHOW_IN_FILE_SYSTEM);
+		context_menu->add_separator();
 	}
 
-	context_menu->add_separator();
 	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/window_move_up"), WINDOW_MOVE_UP);
 	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/window_move_down"), WINDOW_MOVE_DOWN);
 	context_menu->add_shortcut(ED_GET_SHORTCUT("script_editor/window_sort"), WINDOW_SORT);
@@ -2895,13 +2897,14 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	script_list->set_v_size_flags(SIZE_EXPAND_FILL);
 	script_split->set_split_offset(140);
 	_sort_list_on_update = true;
-	script_list->connect("gui_input", this, "_script_list_gui_input");
+	script_list->connect("gui_input", this, "_script_list_gui_input", varray(), CONNECT_DEFERRED);
 	script_list->set_allow_rmb_select(true);
 	script_list->set_drag_forwarding(this);
 
 	context_menu = memnew(PopupMenu);
 	add_child(context_menu);
 	context_menu->connect("id_pressed", this, "_menu_option");
+	context_menu->set_hide_on_window_lose_focus(true);
 
 	overview_vbox = memnew(VBoxContainer);
 	overview_vbox->set_custom_minimum_size(Size2(0, 90));
@@ -2956,6 +2959,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	file_menu = memnew(MenuButton);
 	menu_hb->add_child(file_menu);
 	file_menu->set_text(TTR("File"));
+	file_menu->get_popup()->set_hide_on_window_lose_focus(true);
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/new", TTR("New")), FILE_NEW);
 	file_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/open", TTR("Open")), FILE_OPEN);
 	file_menu->get_popup()->add_submenu_item(TTR("Open Recent"), "RecentScripts", FILE_OPEN_RECENT);
@@ -3005,6 +3009,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	script_search_menu = memnew(MenuButton);
 	menu_hb->add_child(script_search_menu);
 	script_search_menu->set_text(TTR("Search"));
+	script_search_menu->get_popup()->set_hide_on_window_lose_focus(true);
 	script_search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/find", TTR("Find..."), KEY_MASK_CMD | KEY_F), HELP_SEARCH_FIND);
 	script_search_menu->get_popup()->add_shortcut(ED_SHORTCUT("script_editor/find_next", TTR("Find Next"), KEY_F3), HELP_SEARCH_FIND_NEXT);
 	script_search_menu->get_popup()->connect("id_pressed", this, "_menu_option");
@@ -3013,6 +3018,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 	debug_menu = memnew(MenuButton);
 	menu_hb->add_child(debug_menu);
 	debug_menu->set_text(TTR("Debug"));
+	debug_menu->get_popup()->set_hide_on_window_lose_focus(true);
 	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("debugger/step_over", TTR("Step Over"), KEY_F10), DEBUG_NEXT);
 	debug_menu->get_popup()->add_shortcut(ED_SHORTCUT("debugger/step_into", TTR("Step Into"), KEY_F11), DEBUG_STEP);
 	debug_menu->get_popup()->add_separator();
@@ -3094,7 +3100,7 @@ ScriptEditor::ScriptEditor(EditorNode *p_editor) {
 
 	error_dialog = memnew(AcceptDialog);
 	add_child(error_dialog);
-	error_dialog->get_ok()->set_text(TTR("I see..."));
+	error_dialog->get_ok()->set_text(TTR("OK"));
 
 	debugger = memnew(ScriptEditorDebugger(editor));
 	debugger->connect("goto_script_line", this, "_goto_script_line");

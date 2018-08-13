@@ -197,9 +197,9 @@ void StaticBody2D::set_friction(real_t p_friction) {
 
 	if (physics_material_override.is_null()) {
 		physics_material_override.instance();
+		set_physics_material_override(physics_material_override);
 	}
 	physics_material_override->set_friction(p_friction);
-	_reload_physics_characteristics();
 }
 
 real_t StaticBody2D::get_friction() const {
@@ -223,9 +223,9 @@ void StaticBody2D::set_bounce(real_t p_bounce) {
 
 	if (physics_material_override.is_null()) {
 		physics_material_override.instance();
+		set_physics_material_override(physics_material_override);
 	}
 	physics_material_override->set_bounce(p_bounce);
-	_reload_physics_characteristics();
 }
 
 real_t StaticBody2D::get_bounce() const {
@@ -243,7 +243,8 @@ real_t StaticBody2D::get_bounce() const {
 
 void StaticBody2D::set_physics_material_override(const Ref<PhysicsMaterial> &p_physics_material_override) {
 	if (physics_material_override.is_valid()) {
-		physics_material_override->disconnect(CoreStringNames::get_singleton()->changed, this, "_reload_physics_characteristics");
+		if (physics_material_override->is_connected(CoreStringNames::get_singleton()->changed, this, "_reload_physics_characteristics"))
+			physics_material_override->disconnect(CoreStringNames::get_singleton()->changed, this, "_reload_physics_characteristics");
 	}
 
 	physics_material_override = p_physics_material_override;
@@ -300,13 +301,9 @@ void StaticBody2D::_reload_physics_characteristics() {
 	if (physics_material_override.is_null()) {
 		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, 0);
 		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, 1);
-		Physics2DServer::get_singleton()->body_set_combine_mode(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, Physics2DServer::COMBINE_MODE_INHERIT);
-		Physics2DServer::get_singleton()->body_set_combine_mode(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, Physics2DServer::COMBINE_MODE_INHERIT);
 	} else {
-		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, physics_material_override->get_bounce());
-		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, physics_material_override->get_friction());
-		Physics2DServer::get_singleton()->body_set_combine_mode(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, (Physics2DServer::CombineMode)physics_material_override->get_bounce_combine_mode());
-		Physics2DServer::get_singleton()->body_set_combine_mode(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, (Physics2DServer::CombineMode)physics_material_override->get_friction_combine_mode());
+		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, physics_material_override->computed_bounce());
+		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, physics_material_override->computed_friction());
 	}
 }
 
@@ -625,9 +622,9 @@ void RigidBody2D::set_friction(real_t p_friction) {
 
 	if (physics_material_override.is_null()) {
 		physics_material_override.instance();
+		set_physics_material_override(physics_material_override);
 	}
 	physics_material_override->set_friction(p_friction);
-	_reload_physics_characteristics();
 }
 real_t RigidBody2D::get_friction() const {
 
@@ -650,9 +647,9 @@ void RigidBody2D::set_bounce(real_t p_bounce) {
 
 	if (physics_material_override.is_null()) {
 		physics_material_override.instance();
+		set_physics_material_override(physics_material_override);
 	}
 	physics_material_override->set_bounce(p_bounce);
-	_reload_physics_characteristics();
 }
 real_t RigidBody2D::get_bounce() const {
 
@@ -669,7 +666,8 @@ real_t RigidBody2D::get_bounce() const {
 
 void RigidBody2D::set_physics_material_override(const Ref<PhysicsMaterial> &p_physics_material_override) {
 	if (physics_material_override.is_valid()) {
-		physics_material_override->disconnect(CoreStringNames::get_singleton()->changed, this, "_reload_physics_characteristics");
+		if (physics_material_override->is_connected(CoreStringNames::get_singleton()->changed, this, "_reload_physics_characteristics"))
+			physics_material_override->disconnect(CoreStringNames::get_singleton()->changed, this, "_reload_physics_characteristics");
 	}
 
 	physics_material_override = p_physics_material_override;
@@ -1116,13 +1114,9 @@ void RigidBody2D::_reload_physics_characteristics() {
 	if (physics_material_override.is_null()) {
 		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, 0);
 		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, 1);
-		Physics2DServer::get_singleton()->body_set_combine_mode(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, Physics2DServer::COMBINE_MODE_INHERIT);
-		Physics2DServer::get_singleton()->body_set_combine_mode(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, Physics2DServer::COMBINE_MODE_INHERIT);
 	} else {
-		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, physics_material_override->get_bounce());
-		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, physics_material_override->get_friction());
-		Physics2DServer::get_singleton()->body_set_combine_mode(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, (Physics2DServer::CombineMode)physics_material_override->get_bounce_combine_mode());
-		Physics2DServer::get_singleton()->body_set_combine_mode(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, (Physics2DServer::CombineMode)physics_material_override->get_friction_combine_mode());
+		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_BOUNCE, physics_material_override->computed_bounce());
+		Physics2DServer::get_singleton()->body_set_param(get_rid(), Physics2DServer::BODY_PARAM_FRICTION, physics_material_override->computed_friction());
 	}
 }
 
@@ -1210,6 +1204,9 @@ bool KinematicBody2D::move_and_collide(const Vector2 &p_motion, bool p_infinite_
 	return colliding;
 }
 
+//so, if you pass 45 as limit, avoid numerical precision erros when angle is 45.
+#define FLOOR_ANGLE_THRESHOLD 0.01
+
 Vector2 KinematicBody2D::move_and_slide(const Vector2 &p_linear_velocity, const Vector2 &p_floor_direction, bool p_infinite_inertia, float p_slope_stop_min_velocity, int p_max_slides, float p_floor_max_angle) {
 
 	Vector2 floor_motion = floor_velocity;
@@ -1263,7 +1260,7 @@ Vector2 KinematicBody2D::move_and_slide(const Vector2 &p_linear_velocity, const 
 					//all is a wall
 					on_wall = true;
 				} else {
-					if (collision.normal.dot(p_floor_direction) >= Math::cos(p_floor_max_angle)) { //floor
+					if (collision.normal.dot(p_floor_direction) >= Math::cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { //floor
 
 						on_floor = true;
 						on_floor_body = collision.collider_rid;
@@ -1278,7 +1275,7 @@ Vector2 KinematicBody2D::move_and_slide(const Vector2 &p_linear_velocity, const 
 							set_global_transform(gt);
 							return Vector2();
 						}
-					} else if (collision.normal.dot(-p_floor_direction) >= Math::cos(p_floor_max_angle)) { //ceiling
+					} else if (collision.normal.dot(-p_floor_direction) >= Math::cos(p_floor_max_angle + FLOOR_ANGLE_THRESHOLD)) { //ceiling
 						on_ceiling = true;
 					} else {
 						on_wall = true;

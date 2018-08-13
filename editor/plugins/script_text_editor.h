@@ -39,6 +39,7 @@ class ScriptTextEditor : public ScriptEditorBase {
 	GDCLASS(ScriptTextEditor, ScriptEditorBase);
 
 	CodeTextEditor *code_editor;
+	RichTextLabel *warnings_panel;
 
 	Ref<Script> script;
 
@@ -112,6 +113,7 @@ class ScriptTextEditor : public ScriptEditorBase {
 		DEBUG_GOTO_NEXT_BREAKPOINT,
 		DEBUG_GOTO_PREV_BREAKPOINT,
 		HELP_CONTEXTUAL,
+		LOOKUP_SYMBOL,
 	};
 
 protected:
@@ -123,6 +125,8 @@ protected:
 	void _code_complete_script(const String &p_code, List<String> *r_options, bool &r_force);
 	void _load_theme_settings();
 	void _set_theme_for_script();
+	void _toggle_warning_pannel(const Ref<InputEvent> &p_event);
+	void _warning_clicked(Variant p_line);
 
 	void _notification(int p_what);
 	static void _bind_methods();
@@ -131,7 +135,7 @@ protected:
 	void _change_syntax_highlighter(int p_idx);
 
 	void _edit_option(int p_op);
-	void _make_context_menu(bool p_selection, bool p_color, bool p_can_fold, bool p_is_folded);
+	void _make_context_menu(bool p_selection, bool p_color, bool p_foldable, bool p_open_docs, bool p_goto_definition);
 	void _text_edit_gui_input(const Ref<InputEvent> &ev);
 	void _color_changed(const Color &p_color);
 

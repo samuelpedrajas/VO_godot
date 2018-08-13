@@ -73,7 +73,7 @@ static void _debugger_get_resource_usage(List<ScriptDebuggerRemote::ResourceUsag
 		usage.vram = E->get().bytes;
 		usage.id = E->get().texture;
 		usage.type = "Texture";
-		usage.format = itos(E->get().size.width) + "x" + itos(E->get().size.height) + " " + Image::get_format_name(E->get().format);
+		usage.format = itos(E->get().width) + "x" + itos(E->get().height) + " " + Image::get_format_name(E->get().format);
 		r_usage->push_back(usage);
 	}
 }
@@ -104,6 +104,7 @@ void register_server_types() {
 
 	ClassDB::register_virtual_class<AudioStream>();
 	ClassDB::register_virtual_class<AudioStreamPlayback>();
+	ClassDB::register_class<AudioStreamMicrophone>();
 	ClassDB::register_class<AudioStreamRandomPitch>();
 	ClassDB::register_virtual_class<AudioEffect>();
 	ClassDB::register_class<AudioEffectEQ>();

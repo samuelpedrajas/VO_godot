@@ -253,7 +253,8 @@ void EditorHelpSearch::_notification(int p_what) {
 	if (p_what == NOTIFICATION_ENTER_TREE) {
 
 		//_update_icons
-		search_box->add_icon_override("right_icon", get_icon("Search", "EditorIcons"));
+		search_box->set_right_icon(get_icon("Search", "EditorIcons"));
+		search_box->set_clear_button_enabled(true);
 
 		connect("confirmed", this, "_confirmed");
 		_update_search();
@@ -267,7 +268,8 @@ void EditorHelpSearch::_notification(int p_what) {
 	} else if (p_what == EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED) {
 
 		//_update_icons
-		search_box->add_icon_override("right_icon", get_icon("Search", "EditorIcons"));
+		search_box->set_right_icon(get_icon("Search", "EditorIcons"));
+		search_box->set_clear_button_enabled(true);
 	} else if (p_what == NOTIFICATION_PROCESS) {
 
 		if (search.is_valid()) {
@@ -381,7 +383,8 @@ void EditorHelpIndex::_notification(int p_what) {
 	if (p_what == NOTIFICATION_ENTER_TREE) {
 
 		//_update_icons
-		search_box->add_icon_override("right_icon", get_icon("Search", "EditorIcons"));
+		search_box->set_right_icon(get_icon("Search", "EditorIcons"));
+		search_box->set_clear_button_enabled(true);
 		_update_class_list();
 
 		connect("confirmed", this, "_tree_item_selected");
@@ -392,7 +395,8 @@ void EditorHelpIndex::_notification(int p_what) {
 	} else if (p_what == EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED) {
 
 		//_update_icons
-		search_box->add_icon_override("right_icon", get_icon("Search", "EditorIcons"));
+		search_box->set_right_icon(get_icon("Search", "EditorIcons"));
+		search_box->set_clear_button_enabled(true);
 	}
 }
 
@@ -541,6 +545,7 @@ void EditorHelp::_class_desc_select(const String &p_select) {
 		String class_name;
 		if (select.find(".") != -1) {
 			class_name = select.get_slice(".", 0);
+			select = select.get_slice(".", 1);
 		} else {
 			class_name = "@GlobalScope";
 		}
@@ -1214,6 +1219,18 @@ Error EditorHelp::_goto_desc(const String &p_class, int p_vscr) {
 
 				constant_line[constants[i].name] = class_desc->get_line_count() - 2;
 				class_desc->push_font(doc_code_font);
+
+				if (constants[i].value.begins_with("Color(") && constants[i].value.ends_with(")")) {
+					String stripped = constants[i].value.replace(" ", "").replace("Color(", "").replace(")", "");
+					Vector<float> color = stripped.split_floats(",");
+					if (color.size() >= 3) {
+						class_desc->push_color(Color(color[0], color[1], color[2]));
+						static const CharType prefix[3] = { 0x25CF /* filled circle */, ' ', 0 };
+						class_desc->add_text(String(prefix));
+						class_desc->pop();
+					}
+				}
+
 				class_desc->push_color(headline_color);
 				_add_text(constants[i].name);
 				class_desc->pop();
@@ -1223,6 +1240,7 @@ Error EditorHelp::_goto_desc(const String &p_class, int p_vscr) {
 				class_desc->push_color(value_color);
 				_add_text(constants[i].value);
 				class_desc->pop();
+
 				class_desc->pop();
 				if (constants[i].description != "") {
 					class_desc->push_font(doc_font);

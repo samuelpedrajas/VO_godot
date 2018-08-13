@@ -231,9 +231,10 @@ public:
 
 		String path;
 		uint32_t flags;
-		int width, height;
+		int width, height, depth;
 		int alloc_width, alloc_height;
 		Image::Format format;
+		VS::TextureType type;
 
 		GLenum target;
 		GLenum gl_format_cache;
@@ -257,7 +258,7 @@ public:
 
 		RenderTarget *render_target;
 
-		Ref<Image> images[6];
+		Vector<Ref<Image> > images;
 
 		bool redraw_if_visible;
 
@@ -327,17 +328,19 @@ public:
 	Ref<Image> _get_gl_image_and_format(const Ref<Image> &p_image, Image::Format p_format, uint32_t p_flags, GLenum &r_gl_format, GLenum &r_gl_internal_format, GLenum &r_gl_type, bool &r_compressed);
 
 	virtual RID texture_create();
-	virtual void texture_allocate(RID p_texture, int p_width, int p_height, Image::Format p_format, uint32_t p_flags = VS::TEXTURE_FLAGS_DEFAULT);
-	virtual void texture_set_data(RID p_texture, const Ref<Image> &p_image, VS::CubeMapSide p_cube_side = VS::CUBEMAP_LEFT);
-	virtual void texture_set_data_partial(RID p_texture, const Ref<Image> &p_image, int src_x, int src_y, int src_w, int src_h, int dst_x, int dst_y, int p_dst_mip, VS::CubeMapSide p_cube_side = VS::CUBEMAP_LEFT);
-	virtual Ref<Image> texture_get_data(RID p_texture, VS::CubeMapSide p_cube_side = VS::CUBEMAP_LEFT) const;
+	virtual void texture_allocate(RID p_texture, int p_width, int p_height, int p_depth_3d, Image::Format p_format, VS::TextureType p_type, uint32_t p_flags = VS::TEXTURE_FLAGS_DEFAULT);
+	virtual void texture_set_data(RID p_texture, const Ref<Image> &p_image, int p_layer = 0);
+	virtual void texture_set_data_partial(RID p_texture, const Ref<Image> &p_image, int src_x, int src_y, int src_w, int src_h, int dst_x, int dst_y, int p_dst_mip, int p_layer = 0);
+	virtual Ref<Image> texture_get_data(RID p_texture, int p_layer = 0) const;
 	virtual void texture_set_flags(RID p_texture, uint32_t p_flags);
 	virtual uint32_t texture_get_flags(RID p_texture) const;
 	virtual Image::Format texture_get_format(RID p_texture) const;
+	virtual VS::TextureType texture_get_type(RID p_texture) const;
 	virtual uint32_t texture_get_texid(RID p_texture) const;
 	virtual uint32_t texture_get_width(RID p_texture) const;
 	virtual uint32_t texture_get_height(RID p_texture) const;
-	virtual void texture_set_size_override(RID p_texture, int p_width, int p_height);
+	virtual uint32_t texture_get_depth(RID p_texture) const;
+	virtual void texture_set_size_override(RID p_texture, int p_width, int p_height, int p_depth);
 
 	virtual void texture_set_path(RID p_texture, const String &p_path);
 	virtual String texture_get_path(RID p_texture) const;
@@ -794,8 +797,40 @@ public:
 
 	/* IMMEDIATE API */
 
+	struct Immediate : public Geometry {
+
+		struct Chunk {
+			RID texture;
+			VS::PrimitiveType primitive;
+			Vector<Vector3> vertices;
+			Vector<Vector3> normals;
+			Vector<Plane> tangents;
+			Vector<Color> colors;
+			Vector<Vector2> uvs;
+			Vector<Vector2> uv2s;
+		};
+
+		List<Chunk> chunks;
+		bool building;
+		int mask;
+		AABB aabb;
+
+		Immediate() {
+			type = GEOMETRY_IMMEDIATE;
+			building = false;
+		}
+	};
+
+	Vector3 chunk_normal;
+	Plane chunk_tangent;
+	Color chunk_color;
+	Vector2 chunk_uv;
+	Vector2 chunk_uv2;
+
+	mutable RID_Owner<Immediate> immediate_owner;
+
 	virtual RID immediate_create();
-	virtual void immediate_begin(RID p_immediate, VS::PrimitiveType p_rimitive, RID p_texture = RID());
+	virtual void immediate_begin(RID p_immediate, VS::PrimitiveType p_primitive, RID p_texture = RID());
 	virtual void immediate_vertex(RID p_immediate, const Vector3 &p_vertex);
 	virtual void immediate_normal(RID p_immediate, const Vector3 &p_normal);
 	virtual void immediate_tangent(RID p_immediate, const Plane &p_tangent);
