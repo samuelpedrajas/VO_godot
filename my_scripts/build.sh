@@ -51,6 +51,8 @@ build_templates() {
 simulation=false
 game_branch=""
 godot_branch=""
+game_force=false
+godot_force=false
 while [ $# -gt 0 ]; do
   case "$1" in
     --simulation=*)
@@ -59,8 +61,14 @@ while [ $# -gt 0 ]; do
     --game_branch=*)
       game_branch="${1#*=}"
       ;;
+    --game_force=*)
+      game_force="${1#*=}"
+      ;;
     --godot_branch=*)
       godot_branch="${1#*=}"
+      ;;
+    --godot_force=*)
+      godot_force="${1#*=}"
       ;;
     *)
       printf "* Error: Invalid argument.*\n"
@@ -76,7 +84,7 @@ if [ ! -z "$game_branch" ]
 then 
 	is_updated "$VO_REPO" "$game_branch"
 	return_val="$?"
-	if [ "$return_val" -eq 1 ]
+	if [ "$return_val" -eq 1 ] || [ $game_force = true ]
 	then
 		printf "Pulling changes to game...\n"
 		eval "git pull origin $game_branch"
@@ -95,7 +103,7 @@ if [ ! -z "$godot_branch" ]
 then 
 	is_updated "$GODOT_REPO" "$godot_branch"
 	return_val="$?"
-	if [ "$return_val" -eq 1 ]
+	if [ "$return_val" -eq 1 ] || [ $godot_force = true ]
 	then
 		printf "Pulling changes to godot...\n"
 		eval "git pull origin $godot_branch"

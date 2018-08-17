@@ -1,5 +1,6 @@
 #import "AdmobBanner.h"
 #include "reference.h"
+#include "math.h"
 
 @implementation AdmobBanner
 
@@ -99,22 +100,76 @@
     [self loadBanner:currentAdUnitId:isOnTop];
 }
 
+/// The number of pixels per inch for this device
+- (CGFloat) pixelsPerInch {
+    struct utsname sysinfo;
+    
+    if (uname(&sysinfo) == 0) {
+        NSString *my_device_model = [NSString stringWithUTF8String:sysinfo.machine];
+        NSLog(@"My device model: %@", my_device_model);
+
+        NSArray *PPI_132 = [NSArray arrayWithObjects: @"iPad2,4", @"iPad2,3", @"iPad2,2", @"iPad2,1", nil];
+        NSArray *PPI_163 = [NSArray arrayWithObjects: @"iPad2,7", @"iPad2,6", @"iPad2,5", nil];
+        NSArray *PPI_264 = [NSArray arrayWithObjects: @"iPad3,3", @"iPad3,2", @"iPad3,1", @"iPad3,6", @"iPad3,5", @"iPad3,4", @"iPad4,3", @"iPad4,2", @"iPad4,1", @"iPad5,4", @"iPad5,3", @"iPad6,8", @"iPad6,7", @"iPad6,4", @"iPad6,3", @"iPad6,12", @"iPad6,11", @"iPad7,2", @"iPad7,1", @"iPad7,4", @"iPad7,3", @"iPad7,6", @"iPad7,5", nil];
+        NSArray *PPI_326 = [NSArray arrayWithObjects: @"iPhone4,1", @"iPhone5,2", @"iPhone5,1", @"iPhone5,4", @"iPhone5,3", @"iPhone6,2", @"iPhone6,1", @"iPhone8,4", @"iPhone7,2", @"iPhone8,1", @"iPhone9,3", @"iPhone9,1", @"iPhone10,4", @"iPhone10,1", @"iPod5,1", @"iPod7,1", @"iPad4,6", @"iPad4,5", @"iPad4,4", @"iPad4,9", @"iPad4,8", @"iPad4,7", @"iPad5,2", @"iPad5,1", nil];
+        NSArray *PPI_401 = [NSArray arrayWithObjects: @"iPhone7,1", @"iPhone8,2", @"iPhone9,4", @"iPhone9,2", @"iPhone10,5", @"iPhone10,2", nil];
+        NSArray *PPI_458 = [NSArray arrayWithObjects: @"iPhone10,6", @"iPhone10,3", nil];
+        NSArray *PPI_NAMES = [NSArray arrayWithObjects: PPI_132, PPI_163, PPI_264, PPI_326, PPI_401, PPI_458, nil];
+        NSArray *PPIS = [NSArray arrayWithObjects: @132.0, @163.0, @264.0, @326.0, @401.0, @458.0, nil];
+
+        int i;
+        int count = [PPIS count];
+        for (i = 0; i < count; i++) {
+            NSArray *devices = PPI_NAMES[i];
+            int j;
+            int device_count = [devices count];
+            for (j = 0; j < device_count; j++) {
+                NSString *device_model = devices[j];
+                NSLog(@"Device model: %@", device_model);
+                if ([my_device_model isEqualToString:device_model]) {
+                    return [PPIS[i] floatValue];
+                }
+            }
+        }
+    }
+    // return aproximate
+    return 163.0;
+}
+
+
+- (CGFloat) pointsToPixels:(CGFloat)points {
+    CGRect r = [[UIScreen mainScreen] nativeBounds];
+    CGFloat h = r.size.height;
+    CGFloat w = r.size.width;
+    CGFloat ppi = [self pixelsPerInch];
+    CGFloat inches = sqrt(pow(h, 2) + pow(w, 2)) / ppi;
+    CGFloat game_ppi = 2203.0 / inches; // 2203 = sqrt(1080^2 + 1920^2)
+    NSLog(@"Points %f", points);
+    NSLog(@"ppi %f", ppi);
+    NSLog(@"w %f h %f", w, h);
+    return game_ppi * (points / 163.0);
+}
+
 - (int) getBannerWidth {
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     if (orientation == 0 || orientation == UIInterfaceOrientationPortrait) { //portrait
-        return CGSizeFromGADAdSize(kGADAdSizeSmartBannerPortrait).width;
+        NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerPortrait.size.height);
+        return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerPortrait).width];
     }
 
-    return CGSizeFromGADAdSize(kGADAdSizeSmartBannerLandscape).width;
+    NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerLandscape.size.height);
+    return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerLandscape).width];
 }
 
 - (int) getBannerHeight {
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     if (orientation == 0 || orientation == UIInterfaceOrientationPortrait) { //portrait
-        return CGSizeFromGADAdSize(kGADAdSizeSmartBannerPortrait).height;
+        NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerPortrait.size.height);
+        return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerPortrait).height];
     }
 
-    return CGSizeFromGADAdSize(kGADAdSizeSmartBannerLandscape).height;
+    NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerLandscape.size.height);
+    return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerLandscape).height];
 }
 
 /// Tells the delegate an ad request loaded an ad.

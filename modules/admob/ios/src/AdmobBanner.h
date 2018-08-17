@@ -1,4 +1,5 @@
 #import <GoogleMobileAds/GADBannerView.h>
+#import <sys/utsname.h>
 #import "app_delegate.h"
 
 @interface AdmobBanner: UIViewController <GADBannerViewDelegate> {
@@ -15,6 +16,7 @@
 - (void)showBanner;
 - (void)hideBanner;
 - (void)resize;
+- (CGFloat)pointsToPixels:(CGFloat)points;
 - (int)getBannerWidth;
 - (int)getBannerHeight;
 
