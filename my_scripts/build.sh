@@ -36,15 +36,20 @@ build_templates() {
 	# if simulator is true
 	if [ "$1" = true ]
 	then
+		printf "Building simulator\n"
 		eval "scons p=iphone target=debug tools=no arch=x86 bits=32 -j4"
 		eval "scons p=iphone target=debug tools=no arch=x86_64 bits=64 -j4"
 		eval "lipo -create bin/libgodot.iphone.debug.x86.a bin/libgodot.iphone.debug.x86_64.a -output bin/godot_ios_xcode/libgodot.iphone.debug.simulator.fat.a"
+		printf "Copying compiled templates..."
+		eval "cp bin/godot_ios_xcode/libgodot.iphone.debug.simulator.fat.a $GODOT_OUTPUT"
+	else
+		printf "Building release\n"
+		eval "scons p=iphone target=release tools=no arch=arm bits=32 -j4"
+		eval "scons p=iphone target=release tools=no arch=arm64 bits=64 -j4"
+		eval "lipo -create bin/libgodot.iphone.opt.arm.a bin/libgodot.iphone.opt.arm64.a -output bin/godot_ios_xcode/libgodot.iphone.release.fat.a"
+		printf "Copying compiled templates..."
+		eval "cp bin/godot_ios_xcode/libgodot.iphone.release.fat.a $GODOT_OUTPUT"
 	fi
-
-	printf "Building release\n"
-	eval "scons p=iphone target=release tools=no arch=arm bits=32 -j4"
-	eval "scons p=iphone target=release tools=no arch=arm64 bits=64 -j4"
-	eval "lipo -create bin/libgodot.iphone.opt.arm.a bin/libgodot.iphone.opt.arm64.a -output bin/godot_ios_xcode/libgodot.iphone.release.fat.a"
 }
 
 # parse parameter
@@ -113,9 +118,6 @@ then
 
 		printf "Compiling templates..."
 		build_templates "$simulation"
-
-		printf "Copying compiled templates..."
-		eval "cp bin/godot_ios_xcode/libgodot.iphone.release.fat.a $GODOT_OUTPUT"
 
 		something_changed=true
 		printf "Done.\n"
