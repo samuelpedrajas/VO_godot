@@ -106,6 +106,11 @@
     
     if (uname(&sysinfo) == 0) {
         NSString *my_device_model = [NSString stringWithUTF8String:sysinfo.machine];
+
+        // if in emulator
+        if ([my_device_model isEqualToString:@"x86_64"] || [my_device_model isEqualToString:@"i386"]) {
+            *my_device_model = NSProcessInfo.processInfo.environment[@"SIMULATOR_MODEL_IDENTIFIER"];
+        }
         NSLog(@"My device model: %@", my_device_model);
 
         NSArray *PPI_132 = [NSArray arrayWithObjects: @"iPad2,4", @"iPad2,3", @"iPad2,2", @"iPad2,1", nil];
@@ -132,8 +137,21 @@
             }
         }
     }
-    // return aproximate
-    return 163.0;
+
+    // make an aproximation
+    float scale = 1;
+    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
+        scale = [[UIScreen mainScreen] scale];
+    }
+    float dpi;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        dpi = 132 * scale;
+    } else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        dpi = 163 * scale;
+    } else {
+        dpi = 160 * scale;
+    }
+    return dpi;
 }
 
 
