@@ -1,6 +1,6 @@
 #import "AdmobBanner.h"
 #include "reference.h"
-#include "math.h"
+
 
 @implementation AdmobBanner
 
@@ -158,14 +158,14 @@
 - (CGFloat) pointsToPixels:(CGFloat)points {
     CGRect r = [[UIScreen mainScreen] nativeBounds];
     CGFloat h = r.size.height;
-    CGFloat w = r.size.width;
     CGFloat ppi = [self pixelsPerInch];
-    CGFloat inches = sqrt(pow(h, 2) + pow(w, 2)) / ppi;
-    CGFloat game_ppi = 2203.0 / inches; // 2203 = sqrt(1080^2 + 1920^2)
+
     NSLog(@"Points %f", points);
-    NSLog(@"ppi %f", ppi);
-    NSLog(@"w %f h %f", w, h);
-    return game_ppi * (points / 163.0);
+    NSLog(@"PPI %f", ppi);
+    NSLog(@"h %f", h);
+
+    CGFloat original_pixels = (points / 163.0) * ppi;
+    return original_pixels / h * 1920.0;
 }
 
 - (int) getBannerWidth {
