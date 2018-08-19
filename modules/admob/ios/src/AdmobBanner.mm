@@ -109,7 +109,7 @@
 
         // if in emulator
         if ([my_device_model isEqualToString:@"x86_64"] || [my_device_model isEqualToString:@"i386"]) {
-            *my_device_model = NSProcessInfo.processInfo.environment[@"SIMULATOR_MODEL_IDENTIFIER"];
+            my_device_model = NSProcessInfo.processInfo.environment[@"SIMULATOR_MODEL_IDENTIFIER"];
         }
         NSLog(@"My device model: %@", my_device_model);
 
