@@ -15,6 +15,9 @@ import android.util.Log;
 import java.util.Locale;
 import android.view.Gravity;
 import android.view.View;
+import android.graphics.Point;
+import android.view.WindowManager;
+import android.view.Display;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
@@ -324,11 +327,11 @@ public class GodotAdMob extends Godot.SingletonBase
 	 */
 	public int getBannerHeight()
 	{
-		Display display = getWindowManager().getDefaultDisplay();
+		Display display = activity.getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
-		int height = size.y;
-		return AdSize.SMART_BANNER.getHeightInPixels(activity) / height * 1920.0;
+		float height = (float)size.y;
+		return (int)(AdSize.SMART_BANNER.getHeightInPixels(activity) / height * 1920.0);
 	}
 
 	/* Interstitial
