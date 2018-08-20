@@ -156,16 +156,17 @@
 
 
 - (CGFloat) pointsToPixels:(CGFloat)points {
-    CGRect r = [[UIScreen mainScreen] nativeBounds];
-    CGFloat h = r.size.height;
-    CGFloat ppi = [self pixelsPerInch];
+    // CGRect r = [[UIScreen mainScreen] nativeBounds];
+    // CGFloat h = r.size.height;
+    // CGFloat ppi = [self pixelsPerInch];
 
-    NSLog(@"Points %f", points);
-    NSLog(@"PPI %f", ppi);
-    NSLog(@"h %f", h);
+    // NSLog(@"Points %f", points);
+    // NSLog(@"PPI %f", ppi);
+    // NSLog(@"h %f", h);
 
-    CGFloat original_pixels = (points / 163.0) * ppi;
-    return original_pixels / h * 1920.0;
+    // CGFloat original_pixels = (points / 163.0) * ppi;
+    // return original_pixels / h * 1920.0;
+    return points * [UIScreen mainScreen].scale;
 }
 
 - (int) getBannerWidth {
