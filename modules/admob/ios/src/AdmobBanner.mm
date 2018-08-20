@@ -156,8 +156,6 @@
 
 
 - (CGFloat) pointsToPixels:(CGFloat)points {
-    // CGRect r = [[UIScreen mainScreen] nativeBounds];
-    // CGFloat h = r.size.height;
     // CGFloat ppi = [self pixelsPerInch];
 
     // NSLog(@"Points %f", points);
@@ -166,18 +164,9 @@
 
     // CGFloat original_pixels = (points / 163.0) * ppi;
     // return original_pixels / h * 1920.0;
-    return points * [UIScreen mainScreen].scale;
-}
-
-- (int) getBannerWidth {
-    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-    if (orientation == 0 || orientation == UIInterfaceOrientationPortrait) { //portrait
-        NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerPortrait.size.height);
-        return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerPortrait).width];
-    }
-
-    NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerLandscape.size.height);
-    return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerLandscape).width];
+    CGRect r = [[UIScreen mainScreen] nativeBounds];
+    CGFloat h = r.size.height;
+    return (points * [UIScreen mainScreen].scale) / h * 1920.0;
 }
 
 - (int) getBannerHeight {

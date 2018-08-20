@@ -17,7 +17,6 @@
 - (void)hideBanner;
 - (void)resize;
 - (CGFloat)pointsToPixels:(CGFloat)points;
-- (int)getBannerWidth;
 - (int)getBannerHeight;
 
 @end
