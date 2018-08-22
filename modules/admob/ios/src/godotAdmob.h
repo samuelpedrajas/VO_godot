@@ -48,7 +48,7 @@ public:
     void hideBanner();
     void resize();
     int getBannerWidth();
-    int getBannerHeight();
+    int getBannerHeight(int gameHeight);
     void loadInterstitial(const String &interstitialId);
     void showInterstitial();
     void loadRewardedVideo(const String &rewardedId);

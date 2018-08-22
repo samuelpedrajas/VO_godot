@@ -82,12 +82,12 @@ int GodotAdmob::getBannerWidth() {
     return (uintptr_t)[banner getBannerWidth];
 }
 
-int GodotAdmob::getBannerHeight() {
+int GodotAdmob::getBannerHeight(int gameHeight) {
     if (!initialized) {
         NSLog(@"GodotAdmob Module not initialized");
         return 0;
     }
-    return (uintptr_t)[banner getBannerHeight];
+    return (uintptr_t)[banner getBannerHeight:gameHeight];
 }
 
 void GodotAdmob::loadInterstitial(const String &interstitialId) {
