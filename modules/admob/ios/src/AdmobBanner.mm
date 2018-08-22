@@ -155,7 +155,7 @@
 }
 
 
-- (CGFloat) pointsToPixels:(int)points:(int)screenHeight {
+- (int) pointsToPixels:(int)points:(int)screenHeight {
     // CGFloat ppi = [self pixelsPerInch];
 
     // NSLog(@"Points %f", points);
@@ -165,7 +165,7 @@
     // CGFloat original_pixels = (points / 163.0) * ppi;
     // return original_pixels / h * 1920.0;
     CGRect r = [[UIScreen mainScreen] nativeBounds];
-    CGFloat h = r.size.height;
+    int h = (int)r.size.height;
     return (points * [UIScreen mainScreen].scale) / h * screenHeight;
 }
 
