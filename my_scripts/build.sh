@@ -113,9 +113,6 @@ then
 		printf "Pulling changes to godot...\n"
 		eval "git pull origin $godot_branch"
 
-		printf "Removing godot_ios_xcode content..."
-		eval "rm -rf bin/godot_ios_xcode/*"
-
 		printf "Compiling templates..."
 		build_templates "$simulation"
 
