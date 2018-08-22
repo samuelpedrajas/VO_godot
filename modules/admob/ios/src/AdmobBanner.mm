@@ -155,7 +155,7 @@
 }
 
 
-- (CGFloat) pointsToPixels:(CGFloat)points {
+- (CGFloat) pointsToPixels:(int)points:(int)screenHeight {
     // CGFloat ppi = [self pixelsPerInch];
 
     // NSLog(@"Points %f", points);
@@ -166,18 +166,18 @@
     // return original_pixels / h * 1920.0;
     CGRect r = [[UIScreen mainScreen] nativeBounds];
     CGFloat h = r.size.height;
-    return (points * [UIScreen mainScreen].scale) / h * 1920.0;
+    return (points * [UIScreen mainScreen].scale) / h * screenHeight;
 }
 
-- (int) getBannerHeight {
+- (int) getBannerHeight:(int)screenHeight {
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     if (orientation == 0 || orientation == UIInterfaceOrientationPortrait) { //portrait
         NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerPortrait.size.height);
-        return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerPortrait).height];
+        return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerPortrait).height:screenHeight];
     }
 
     NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerLandscape.size.height);
-    return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerLandscape).height];
+    return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerLandscape).height:screenHeight];
 }
 
 /// Tells the delegate an ad request loaded an ad.

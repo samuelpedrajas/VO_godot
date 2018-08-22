@@ -325,13 +325,11 @@ public class GodotAdMob extends Godot.SingletonBase
 	 * Get the banner height
 	 * @return int Banner height
 	 */
-	public int getBannerHeight()
+	public int getBannerHeight(int screenHeight)
 	{
-		Display display = activity.getWindowManager().getDefaultDisplay();
 		Point size = new Point();
-		display.getSize(size);
-		float height = (float)size.y;
-		return (int)(AdSize.SMART_BANNER.getHeightInPixels(activity) / height * 1920.0);
+		activity.getWindowManager().getDefaultDisplay().getRealSize(size);
+		return (int)(AdSize.SMART_BANNER.getHeightInPixels(activity) / (float)size.y * screenHeight);
 	}
 
 	/* Interstitial

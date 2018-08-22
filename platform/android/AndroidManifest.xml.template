@@ -5,7 +5,7 @@
       android:versionName="1.0"
       android:installLocation="auto"
       >
-<supports-screens android:smallScreens="true"
+<supports-screens android:smallScreens="false"
                       android:normalScreens="true"
                       android:largeScreens="true"
                       android:xlargeScreens="true"/>
@@ -15,7 +15,7 @@
                   android:label="@string/godot_project_name_string"
                   android:theme="@style/LauncherTheme"
                   android:launchMode="singleTask"
-                  android:screenOrientation="landscape"
+                  android:screenOrientation="portrait"
                   android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
                   android:resizeableActivity="false">
 
