@@ -103,7 +103,7 @@
 /// The number of pixels per inch for this device
 - (CGFloat) pixelsPerInch {
     struct utsname sysinfo;
-    
+
     if (uname(&sysinfo) == 0) {
         NSString *my_device_model = [NSString stringWithUTF8String:sysinfo.machine];
 
