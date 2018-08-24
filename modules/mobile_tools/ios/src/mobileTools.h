@@ -21,6 +21,7 @@ public:
 
     void shareText(const String &title, const String &subject, const String &text);
     void sharePic(const String &path, const String &title, const String &subject, const String &text);
+    bool rateApp();
 
     MobileTools();
     ~MobileTools();
