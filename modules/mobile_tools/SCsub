@@ -3,7 +3,7 @@ Import('env')
 
 sources = [
            'register_types.cpp',
-           'ios/src/godotShare.mm'
+           'ios/src/mobileTools.mm'
            ]
 
 if (env["platform"] == "iphone"):

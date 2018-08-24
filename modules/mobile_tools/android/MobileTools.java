@@ -10,7 +10,7 @@ import android.support.v4.content.FileProvider;
 
 import android.util.Log;
 
-public class GodotShare extends Godot.SingletonBase
+public class MobileTools extends Godot.SingletonBase
 {
 
 	private static final String TAG = "godot";
@@ -18,12 +18,12 @@ public class GodotShare extends Godot.SingletonBase
 
 	static public Godot.SingletonBase initialize(Activity p_activity)
 	{
-		return new GodotShare(p_activity);
+		return new MobileTools(p_activity);
 	}
 	
-	public GodotShare(Activity p_activity)
+	public MobileTools(Activity p_activity)
 	{
-		registerClass("GodotShare", new String[]
+		registerClass("MobileTools", new String[]
 		{
 			"sharePic","shareText"
 		});

@@ -1,21 +1,21 @@
-#include "godotShare.h"
+#include "mobileTools.h"
 
 
 #import "app_delegate.h"
 
 
-GodotShare::GodotShare() {
+MobileTools::MobileTools() {
     ERR_FAIL_COND(instance != NULL);
     instance = this;
 }
 
-GodotShare::~GodotShare() {
+MobileTools::~MobileTools() {
     instance = NULL;
 }
 
 
 
-void GodotShare::shareText(const String &title, const String &subject, const String &text) {
+void MobileTools::shareText(const String &title, const String &subject, const String &text) {
     
     ViewController *root_controller = (ViewController *)((AppDelegate *)[[UIApplication sharedApplication] delegate]).window.rootViewController;
     
@@ -29,7 +29,7 @@ void GodotShare::shareText(const String &title, const String &subject, const Str
 
 }
 
-void GodotShare::sharePic(const String &path, const String &title, const String &subject, const String &text) {
+void MobileTools::sharePic(const String &path, const String &title, const String &subject, const String &text) {
     ViewController *root_controller = (ViewController *)((AppDelegate *)[[UIApplication sharedApplication] delegate]).window.rootViewController;
     
     NSString * message = [NSString stringWithCString:text.utf8().get_data() encoding:NSUTF8StringEncoding];
@@ -46,13 +46,13 @@ void GodotShare::sharePic(const String &path, const String &title, const String 
 
 
 
-void GodotShare::_bind_methods() {
+void MobileTools::_bind_methods() {
 #if VERSION_MAJOR == 3
-    ClassDB::bind_method(D_METHOD("shareText"), &GodotShare::shareText);
-    ClassDB::bind_method(D_METHOD("sharePic"), &GodotShare::sharePic);
+    ClassDB::bind_method(D_METHOD("shareText"), &MobileTools::shareText);
+    ClassDB::bind_method(D_METHOD("sharePic"), &MobileTools::sharePic);
 #else
-    ObjectTypeDB::bind_method("shareText", &GodotShare::shareText);
-    ObjectTypeDB::bind_method("sharePic", &GodotShare::sharePic);
+    ObjectTypeDB::bind_method("shareText", &MobileTools::shareText);
+    ObjectTypeDB::bind_method("sharePic", &MobileTools::sharePic);
 #endif
     
 }
