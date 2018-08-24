@@ -54,15 +54,23 @@ bool MobileTools::rateApp() {
     return true;
 }
 
+bool MobileTools::rateInAppStore() {
+    UIApplication *application = [UIApplication sharedApplication];
+    NSURL *URL = [NSURL URLWithString:@"itms-apps://itunes.apple.com/us/app/itunes-u/id1431765471?action=write-review"];
+    [application openURL:URL options:@{} completionHandler:nil];
+}
+
 void MobileTools::_bind_methods() {
 #if VERSION_MAJOR == 3
     ClassDB::bind_method(D_METHOD("shareText"), &MobileTools::shareText);
     ClassDB::bind_method(D_METHOD("sharePic"), &MobileTools::sharePic);
     ClassDB::bind_method(D_METHOD("rateApp"), &MobileTools::rateApp);
+    ClassDB::bind_method(D_METHOD("rateInAppStore"), &MobileTools::rateInAppStore);
 #else
     ObjectTypeDB::bind_method("shareText", &MobileTools::shareText);
     ObjectTypeDB::bind_method("sharePic", &MobileTools::sharePic);
     ObjectTypeDB::bind_method("rateApp", &MobileTools::rateApp);
+    ObjectTypeDB::bind_method("rateInAppStore", &MobileTools::rateInAppStore);
 #endif
     
 }
