@@ -2,7 +2,7 @@
 
 
 #import "app_delegate.h"
-import StoreKit
+#import <StoreKit/StoreKit.h>
 
 
 MobileTools::MobileTools() {
@@ -46,10 +46,10 @@ void MobileTools::sharePic(const String &path, const String &title, const String
 }
 
 bool MobileTools::rateApp() {
-    if #available(iOS 10.3, *) {
-        SKStoreReviewController.requestReview()
+    if (floor(NSFoundationVersionNumber) >= NSFoundationVersionNumber_iOS_10_3) {
+        [SKStoreReviewController requestReview];
     } else {
-        return false
+        return false;
     }
     return true;
 }
