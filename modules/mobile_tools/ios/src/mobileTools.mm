@@ -54,7 +54,7 @@ bool MobileTools::rateApp() {
     return true;
 }
 
-bool MobileTools::rateInAppStore() {
+void MobileTools::rateInAppStore() {
     UIApplication *application = [UIApplication sharedApplication];
     NSURL *URL = [NSURL URLWithString:@"itms-apps://itunes.apple.com/us/app/itunes-u/id1431765471?action=write-review"];
     [application openURL:URL options:@{} completionHandler:nil];
