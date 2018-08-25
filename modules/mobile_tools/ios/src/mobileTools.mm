@@ -45,12 +45,15 @@ void MobileTools::sharePic(const String &path, const String &title, const String
     [root_controller presentViewController:avc animated:YES completion:nil];
 }
 
-bool MobileTools::rateApp() {
+void MobileTools::rateApp() {
+    [SKStoreReviewController requestReview];
+}
+
+bool MobileTools::canShowRate() {
     if (@available(iOS 10.3, *)) {
-        [SKStoreReviewController requestReview];
-    } else {
-        return false;
+        return true;
     }
+
     return true;
 }
 
@@ -66,11 +69,13 @@ void MobileTools::_bind_methods() {
     ClassDB::bind_method(D_METHOD("sharePic"), &MobileTools::sharePic);
     ClassDB::bind_method(D_METHOD("rateApp"), &MobileTools::rateApp);
     ClassDB::bind_method(D_METHOD("rateInAppStore"), &MobileTools::rateInAppStore);
+    ClassDB::bind_method(D_METHOD("canShowRate"), &MobileTools::canShowRate);
 #else
     ObjectTypeDB::bind_method("shareText", &MobileTools::shareText);
     ObjectTypeDB::bind_method("sharePic", &MobileTools::sharePic);
     ObjectTypeDB::bind_method("rateApp", &MobileTools::rateApp);
     ObjectTypeDB::bind_method("rateInAppStore", &MobileTools::rateInAppStore);
+    ObjectTypeDB::bind_method("canShowRate", &MobileTools::canShowRate);
 #endif
     
 }
