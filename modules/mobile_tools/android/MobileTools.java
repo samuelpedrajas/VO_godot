@@ -7,6 +7,8 @@ import android.app.*;
 import android.net.Uri;
 import android.content.ContextWrapper;
 import android.support.v4.content.FileProvider;
+import android.graphics.Point;
+
 
 import android.util.Log;
 
@@ -25,7 +27,7 @@ public class MobileTools extends Godot.SingletonBase
 	{
 		registerClass("MobileTools", new String[]
 		{
-			"sharePic","shareText"
+			"sharePic","shareText", "getDeviceHeight"
 		});
 		activity = p_activity;
 		
@@ -62,5 +64,13 @@ public class MobileTools extends Godot.SingletonBase
 		shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
 		shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 		activity.startActivity(Intent.createChooser(shareIntent, title));
+	}
+
+
+	public int getDeviceHeight() {
+		Log.d(TAG, "getDeviceHeight called");
+		Point size = new Point();
+		activity.getWindowManager().getDefaultDisplay().getRealSize(size);
+		return size.y;
 	}
 }

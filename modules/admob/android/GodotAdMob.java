@@ -16,8 +16,6 @@ import java.util.Locale;
 import android.view.Gravity;
 import android.view.View;
 import android.graphics.Point;
-import android.view.WindowManager;
-import android.view.Display;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
