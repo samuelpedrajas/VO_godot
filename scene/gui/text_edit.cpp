@@ -3119,16 +3119,14 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 					if (selection.active) {
 						int ini = selection.from_line;
 						int end = selection.to_line;
+
 						for (int i = ini; i <= end; i++) {
-							if (get_line(i).begins_with("#"))
-								_remove_text(i, 0, i, 1);
+							_uncomment_line(i);
 						}
 					} else {
-						if (get_line(cursor.line).begins_with("#")) {
-							_remove_text(cursor.line, 0, cursor.line, 1);
-							if (cursor.column >= get_line(cursor.line).length()) {
-								cursor.column = MAX(0, get_line(cursor.line).length() - 1);
-							}
+						_uncomment_line(cursor.line);
+						if (cursor.column >= get_line(cursor.line).length()) {
+							cursor.column = MAX(0, get_line(cursor.line).length() - 1);
 						}
 					}
 					update();
@@ -3205,6 +3203,24 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 		}
 
 		return;
+	}
+}
+
+void TextEdit::_uncomment_line(int p_line) {
+	String line_text = get_line(p_line);
+	for (int i = 0; i < line_text.length(); i++) {
+		if (line_text[i] == '#') {
+			_remove_text(p_line, i, p_line, i + 1);
+			if (p_line == selection.to_line && selection.to_column > line_text.length() - 1) {
+				selection.to_column -= 1;
+				if (selection.to_column >= selection.from_column) {
+					selection.active = false;
+				}
+			}
+			return;
+		} else if (line_text[i] != '\t' && line_text[i] != ' ') {
+			return;
+		}
 	}
 }
 
@@ -4822,28 +4838,27 @@ bool TextEdit::search(const String &p_key, uint32_t p_search_flags, int p_from_l
 
 		pos = -1;
 
-		int pos_from = 0;
+		int pos_from = (p_search_flags & SEARCH_BACKWARDS) ? text_line.length() : 0;
 		int last_pos = -1;
 
 		while (true) {
 
-			while ((last_pos = (p_search_flags & SEARCH_MATCH_CASE) ? text_line.find(p_key, pos_from) : text_line.findn(p_key, pos_from)) != -1) {
-
-				if (p_search_flags & SEARCH_BACKWARDS) {
-
-					if (last_pos > from_column)
+			if (p_search_flags & SEARCH_BACKWARDS) {
+				while ((last_pos = (p_search_flags & SEARCH_MATCH_CASE) ? text_line.rfind(p_key, pos_from) : text_line.rfindn(p_key, pos_from)) != -1) {
+					if (last_pos <= from_column) {
+						pos = last_pos;
 						break;
-					pos = last_pos;
-
-				} else {
-
+					}
+					pos_from = last_pos - p_key.length();
+				}
+			} else {
+				while ((last_pos = (p_search_flags & SEARCH_MATCH_CASE) ? text_line.find(p_key, pos_from) : text_line.findn(p_key, pos_from)) != -1) {
 					if (last_pos >= from_column) {
 						pos = last_pos;
 						break;
 					}
+					pos_from = last_pos + p_key.length();
 				}
-
-				pos_from = last_pos + p_key.length();
 			}
 
 			bool is_match = true;
@@ -4856,11 +4871,15 @@ bool TextEdit::search(const String &p_key, uint32_t p_search_flags, int p_from_l
 					is_match = false;
 			}
 
+			if (pos_from == -1) {
+				pos = -1;
+			}
+
 			if (is_match || last_pos == -1 || pos == -1) {
 				break;
 			}
 
-			pos_from = pos + 1;
+			pos_from = (p_search_flags & SEARCH_BACKWARDS) ? pos - 1 : pos + 1;
 			pos = -1;
 		}
 
@@ -5910,6 +5929,9 @@ void TextEdit::set_line(int line, String new_text) {
 	if (cursor.line == line) {
 		cursor.column = MIN(cursor.column, new_text.length());
 	}
+	if (is_selection_active() && line == selection.to_line && selection.to_column > text[line].length()) {
+		selection.to_column = text[line].length();
+	}
 }
 
 void TextEdit::insert_at(const String &p_text, int at) {
@@ -6400,8 +6422,8 @@ Map<int, TextEdit::HighlighterInfo> TextEdit::_get_line_syntax_highlighting(int 
 			is_hex_notation = false;
 		}
 
-		// check for dot or underscore or 'x' for hex notation in floating point number
-		if ((str[j] == '.' || str[j] == 'x' || str[j] == '_' || str[j] == 'f') && !in_word && prev_is_number && !is_number) {
+		// check for dot or underscore or 'x' for hex notation in floating point number or 'e' for scientific notation
+		if ((str[j] == '.' || str[j] == 'x' || str[j] == '_' || str[j] == 'f' || str[j] == 'e') && !in_word && prev_is_number && !is_number) {
 			is_number = true;
 			is_symbol = false;
 			is_char = false;

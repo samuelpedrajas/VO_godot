@@ -1174,6 +1174,16 @@ void EditorNode::_dialog_action(String p_file) {
 			int scene_idx = (current_option == FILE_SAVE_SCENE || current_option == FILE_SAVE_AS_SCENE) ? -1 : tab_closing;
 
 			if (file->get_mode() == EditorFileDialog::MODE_SAVE_FILE) {
+				bool same_open_scene = false;
+				for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
+					if (editor_data.get_scene_path(i) == p_file && i != scene_idx)
+						same_open_scene = true;
+				}
+
+				if (same_open_scene) {
+					show_warning(TTR("Can't overwrite scene that is still open!"));
+					return;
+				}
 
 				_save_default_environment();
 				_save_scene_with_preview(p_file, scene_idx);
@@ -2746,6 +2756,8 @@ void EditorNode::set_current_scene(int p_idx) {
 
 	Dictionary state = editor_data.restore_edited_scene_state(editor_selection, &editor_history);
 	_edit_current();
+
+	_update_title();
 
 	call_deferred("_set_main_scene_state", state, get_edited_scene()); //do after everything else is done setting up
 }
