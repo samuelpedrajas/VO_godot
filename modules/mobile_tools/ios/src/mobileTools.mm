@@ -1,8 +1,9 @@
 #include "mobileTools.h"
-
+#include "reference.h"
 
 #import "app_delegate.h"
 #import <StoreKit/StoreKit.h>
+
 
 
 MobileTools::MobileTools() {
