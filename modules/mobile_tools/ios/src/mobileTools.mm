@@ -63,14 +63,6 @@ void MobileTools::rateInAppStore() {
     [application openURL:URL options:@{} completionHandler:nil];
 }
 
-float MobileTools::getDiagonal() {
-    return 1.0;
-}
-
-float MobileTools::getDiagonalInches() {
-    return 1.0;
-}
-
 float MobileTools::pixelsPerInch() {
     struct utsname sysinfo;
 
@@ -124,6 +116,22 @@ float MobileTools::pixelsPerInch() {
     return dpi;
 }
 
+float MobileTools::getDiagonal() {
+    float width = ([[UIScreen mainScreen] bounds].size.width * scale);
+    float height = ([[UIScreen mainScreen] bounds].size.height * scale);
+    return sqrt(pow(width, 2) + pow(height, 2));
+}
+
+float MobileTools::getDiagonalInches() {
+    float dpi = pixelsPerInch();
+    float width = ([[UIScreen mainScreen] bounds].size.width * scale);
+    float height = ([[UIScreen mainScreen] bounds].size.height * scale);
+
+    float horizontal = width / ppi, vertical = height / ppi;
+
+    return sqrt(pow(horizontal, 2) + pow(vertical, 2));
+}
+
 void MobileTools::_bind_methods() {
 #if VERSION_MAJOR == 3
     ClassDB::bind_method(D_METHOD("shareText"), &MobileTools::shareText);
@@ -139,8 +147,8 @@ void MobileTools::_bind_methods() {
     ObjectTypeDB::bind_method("rateApp", &MobileTools::rateApp);
     ObjectTypeDB::bind_method("rateInAppStore", &MobileTools::rateInAppStore);
     ObjectTypeDB::bind_method("canShowRate", &MobileTools::canShowRate);
-    ObjectTypeDB::bind_method("getDiagonalInches", &MobileTools::getDiagonalInches);
     ObjectTypeDB::bind_method("getDiagonal", &MobileTools::getDiagonal);
+    ObjectTypeDB::bind_method("getDiagonalInches", &MobileTools::getDiagonalInches);
 #endif
     
 }

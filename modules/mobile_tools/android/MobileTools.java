@@ -27,7 +27,7 @@ public class MobileTools extends Godot.SingletonBase
 	{
 		registerClass("MobileTools", new String[]
 		{
-			"sharePic","shareText", "getDiagonal", "getDiagonalInches"
+			"sharePic","shareText", "getDiagonal", "getDiagonalInches", "pixelsPerInch"
 		});
 		activity = p_activity;
 		
@@ -87,5 +87,11 @@ public class MobileTools extends Godot.SingletonBase
 		double hi = (double)size.y / (double)dm.ydpi;
 
 		return (float)Math.sqrt(Math.pow(wi, 2) + Math.pow(hi, 2));
+	}
+
+	public float pixelsPerInch() {
+		DisplayMetrics dm = new DisplayMetrics();
+		activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+		return dm.densityDpi;
 	}
 }
