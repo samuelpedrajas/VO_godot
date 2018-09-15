@@ -2,6 +2,7 @@
 #define GODOT_MOBILE_TOOLS_H
 
 #include <version_generated.gen.h>
+#import <sys/utsname.h>
 #include "reference.h"
 
 class MobileTools : public Reference {
