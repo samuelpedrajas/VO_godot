@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.content.ContextWrapper;
 import android.support.v4.content.FileProvider;
 import android.graphics.Point;
-
+import android.util.DisplayMetrics;
 
 import android.util.Log;
 
@@ -27,7 +27,7 @@ public class MobileTools extends Godot.SingletonBase
 	{
 		registerClass("MobileTools", new String[]
 		{
-			"sharePic","shareText", "getDeviceHeight"
+			"sharePic","shareText", "getDiagonal", "getDiagonalInches"
 		});
 		activity = p_activity;
 		
@@ -67,10 +67,25 @@ public class MobileTools extends Godot.SingletonBase
 	}
 
 
-	public int getDeviceHeight() {
-		Log.d(TAG, "getDeviceHeight called");
+	public float getDiagonal() {
+		Log.d(TAG, "getDiagonal called");
 		Point size = new Point();
 		activity.getWindowManager().getDefaultDisplay().getRealSize(size);
-		return size.y;
+		return (float)Math.sqrt(Math.pow(size.x, 2) + Math.pow(size.y, 2));
+	}
+
+
+	public float getDiagonalInches() {
+		Log.d(TAG, "getDiagonalInches called");
+
+		DisplayMetrics dm = new DisplayMetrics();
+		Point size = new Point();
+		activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+		activity.getWindowManager().getDefaultDisplay().getRealSize(size);
+
+		double wi = (double)size.x / (double)dm.xdpi;
+		double hi = (double)size.y / (double)dm.ydpi;
+
+		return (float)Math.sqrt(Math.pow(wi, 2) + Math.pow(hi, 2));
 	}
 }

@@ -24,6 +24,9 @@ public:
     void rateApp();
     void rateInAppStore();
     bool canShowRate();
+    float getDiagonal();
+    float getDiagonalInches();
+    float pixelsPerInch();
 
     MobileTools();
     ~MobileTools();
