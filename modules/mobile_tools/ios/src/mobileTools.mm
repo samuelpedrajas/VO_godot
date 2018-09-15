@@ -117,8 +117,10 @@ float MobileTools::pixelsPerInch() {
 }
 
 float MobileTools::getDiagonal() {
-    float width = ([[UIScreen mainScreen] bounds].size.width * scale);
-    float height = ([[UIScreen mainScreen] bounds].size.height * scale);
+    float ppi = pixelsPerInch();
+    float width = ([[UIScreen mainScreen] bounds].size.width * (ppi / 163.0));
+    float height = ([[UIScreen mainScreen] bounds].size.height * (ppi / 163.0));
+
     return sqrt(pow(width, 2) + pow(height, 2));
 }
 
