@@ -143,6 +143,7 @@ void MobileTools::_bind_methods() {
     ClassDB::bind_method(D_METHOD("canShowRate"), &MobileTools::canShowRate);
     ClassDB::bind_method(D_METHOD("getDiagonal"), &MobileTools::getDiagonal);
     ClassDB::bind_method(D_METHOD("getDiagonalInches"), &MobileTools::getDiagonalInches);
+    ClassDB::bind_method(D_METHOD("pixelsPerInch"), &MobileTools::pixelsPerInch);
 #else
     ObjectTypeDB::bind_method("shareText", &MobileTools::shareText);
     ObjectTypeDB::bind_method("sharePic", &MobileTools::sharePic);
@@ -151,6 +152,7 @@ void MobileTools::_bind_methods() {
     ObjectTypeDB::bind_method("canShowRate", &MobileTools::canShowRate);
     ObjectTypeDB::bind_method("getDiagonal", &MobileTools::getDiagonal);
     ObjectTypeDB::bind_method("getDiagonalInches", &MobileTools::getDiagonalInches);
+    ObjectTypeDB::bind_method("pixelsPerInch", &MobileTools::pixelsPerInch);
 #endif
     
 }
