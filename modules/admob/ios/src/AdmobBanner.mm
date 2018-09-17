@@ -1,5 +1,5 @@
 #import "AdmobBanner.h"
-#include "reference.h"
+#include "core/reference.h"
 
 
 @implementation AdmobBanner

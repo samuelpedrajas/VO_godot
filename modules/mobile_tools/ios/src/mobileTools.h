@@ -1,9 +1,9 @@
 #ifndef GODOT_MOBILE_TOOLS_H
 #define GODOT_MOBILE_TOOLS_H
 
-#include <version_generated.gen.h>
+#include <core/version_generated.gen.h>
 #import <sys/utsname.h>
-#include "reference.h"
+#include "core/reference.h"
 
 class MobileTools : public Reference {
 #if VERSION_MAJOR == 3

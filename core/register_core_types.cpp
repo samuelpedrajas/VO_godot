@@ -28,7 +28,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#include "register_core_types.h"
+#include "core/register_core_types.h"
 
 #include "core/bind/core_bind.h"
 #include "core/class_db.h"
