@@ -1,9 +1,9 @@
 #ifndef GODOT_ADMOB_H
 #define GODOT_ADMOB_H
 
-#include <version_generated.gen.h>
+#include <core/version_generated.gen.h>
 
-#include "reference.h"
+#include "core/reference.h"
 
 
 #ifdef __OBJC__

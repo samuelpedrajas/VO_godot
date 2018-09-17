@@ -1,7 +1,7 @@
 #import "AdmobRewarded.h"
 #import <GoogleMobileAds/GADRewardBasedVideoAd.h>
 #import <GoogleMobileAds/GADAdReward.h>
-#include "reference.h"
+#include "core/reference.h"
 
 
 @implementation AdmobRewarded

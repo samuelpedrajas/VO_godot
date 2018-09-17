@@ -1,5 +1,5 @@
 #import "AdmobInterstitial.h"
-#include "reference.h"
+#include "core/reference.h"
 
 
 @implementation AdmobInterstitial
