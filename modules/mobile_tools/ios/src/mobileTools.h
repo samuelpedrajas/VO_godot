@@ -25,6 +25,7 @@ public:
     void rateApp();
     void rateInAppStore();
     bool canShowRate();
+    int getPointDivisor();
     float getDiagonal();
     float getDiagonalInches();
     float pixelsPerInch();

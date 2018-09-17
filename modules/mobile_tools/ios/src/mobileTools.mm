@@ -63,6 +63,15 @@ void MobileTools::rateInAppStore() {
     [application openURL:URL options:@{} completionHandler:nil];
 }
 
+int MobileTools::getPointDivisor() {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        return 132;
+    } else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        return 163;
+    }
+    return 160;
+}
+
 float MobileTools::pixelsPerInch() {
     struct utsname sysinfo;
 
@@ -105,30 +114,22 @@ float MobileTools::pixelsPerInch() {
     if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
         scale = [[UIScreen mainScreen] scale];
     }
-    float dpi;
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        dpi = 132 * scale;
-    } else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-        dpi = 163 * scale;
-    } else {
-        dpi = 160 * scale;
-    }
-    return dpi;
+
+    return getPointDivisor() * scale;
 }
 
 float MobileTools::getDiagonal() {
     float ppi = pixelsPerInch();
-    float width = ([[UIScreen mainScreen] bounds].size.width * (ppi / 163.0));
-    float height = ([[UIScreen mainScreen] bounds].size.height * (ppi / 163.0));
+    float width = [[UIScreen mainScreen] bounds].size.width * (ppi / getPointDivisor());
+    float height = [[UIScreen mainScreen] bounds].size.height * (ppi / getPointDivisor());
 
     return sqrt(pow(width, 2) + pow(height, 2));
 }
 
 float MobileTools::getDiagonalInches() {
     float ppi = pixelsPerInch();
-    float width = ([[UIScreen mainScreen] bounds].size.width * (ppi / 163.0));
-    float height = ([[UIScreen mainScreen] bounds].size.height * (ppi / 163.0));
-
+    float width = [[UIScreen mainScreen] bounds].size.width * (ppi / getPointDivisor());
+    float height = [[UIScreen mainScreen] bounds].size.height * (ppi / getPointDivisor());
     float horizontal = width / ppi, vertical = height / ppi;
 
     return sqrt(pow(horizontal, 2) + pow(vertical, 2));
