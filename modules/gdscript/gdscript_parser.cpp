@@ -32,14 +32,13 @@
 
 #include "core/core_string_names.h"
 #include "core/engine.h"
+#include "core/io/resource_loader.h"
+#include "core/os/file_access.h"
+#include "core/print_string.h"
 #include "core/project_settings.h"
 #include "core/reference.h"
+#include "core/script_language.h"
 #include "gdscript.h"
-#include "io/resource_loader.h"
-#include "os/file_access.h"
-#include "print_string.h"
-#include "project_settings.h"
-#include "script_language.h"
 
 template <class T>
 T *GDScriptParser::alloc_node() {
@@ -2479,7 +2478,7 @@ void GDScriptParser::_generate_pattern(PatternNode *p_pattern, Node *p_node_to_m
 
 				Node *condition = NULL;
 
-				// chech for has, then for pattern
+				// check for has, then for pattern
 
 				IdentifierNode *has = alloc_node<IdentifierNode>();
 				has->name = "has";
@@ -4383,10 +4382,10 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 					tokenizer->advance();
 				}
 
-				if (tokenizer->get_token() != GDScriptTokenizer::TK_PR_VAR && tokenizer->get_token() != GDScriptTokenizer::TK_PR_ONREADY && tokenizer->get_token() != GDScriptTokenizer::TK_PR_REMOTE && tokenizer->get_token() != GDScriptTokenizer::TK_PR_MASTER && tokenizer->get_token() != GDScriptTokenizer::TK_PR_SLAVE && tokenizer->get_token() != GDScriptTokenizer::TK_PR_SYNC && tokenizer->get_token() != GDScriptTokenizer::TK_PR_REMOTESYNC && tokenizer->get_token() != GDScriptTokenizer::TK_PR_MASTERSYNC && tokenizer->get_token() != GDScriptTokenizer::TK_PR_SLAVESYNC) {
+				if (tokenizer->get_token() != GDScriptTokenizer::TK_PR_VAR && tokenizer->get_token() != GDScriptTokenizer::TK_PR_ONREADY && tokenizer->get_token() != GDScriptTokenizer::TK_PR_REMOTE && tokenizer->get_token() != GDScriptTokenizer::TK_PR_MASTER && tokenizer->get_token() != GDScriptTokenizer::TK_PR_PUPPET && tokenizer->get_token() != GDScriptTokenizer::TK_PR_SYNC && tokenizer->get_token() != GDScriptTokenizer::TK_PR_REMOTESYNC && tokenizer->get_token() != GDScriptTokenizer::TK_PR_MASTERSYNC && tokenizer->get_token() != GDScriptTokenizer::TK_PR_PUPPETSYNC && tokenizer->get_token() != GDScriptTokenizer::TK_PR_SLAVE) {
 
 					current_export = PropertyInfo();
-					_set_error("Expected 'var', 'onready', 'remote', 'master', 'slave', 'sync', 'remotesync', 'mastersync', 'slavesync'.");
+					_set_error("Expected 'var', 'onready', 'remote', 'master', 'puppet', 'sync', 'remotesync', 'mastersync', 'puppetsync'.");
 					return;
 				}
 
@@ -4443,7 +4442,11 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 				rpc_mode = MultiplayerAPI::RPC_MODE_MASTER;
 				continue;
 			} break;
-			case GDScriptTokenizer::TK_PR_SLAVE: {
+			case GDScriptTokenizer::TK_PR_SLAVE:
+#ifdef DEBUG_ENABLED
+				_add_warning(GDScriptWarning::DEPRECATED_KEYWORD, tokenizer->get_token_line(), "slave", "puppet");
+#endif
+			case GDScriptTokenizer::TK_PR_PUPPET: {
 
 				//may be fallthrough from export, ignore if so
 				tokenizer->advance();
@@ -4460,7 +4463,7 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 					}
 				}
 
-				rpc_mode = MultiplayerAPI::RPC_MODE_SLAVE;
+				rpc_mode = MultiplayerAPI::RPC_MODE_PUPPET;
 				continue;
 			} break;
 			case GDScriptTokenizer::TK_PR_REMOTESYNC:
@@ -4476,7 +4479,7 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 					return;
 				}
 
-				rpc_mode = MultiplayerAPI::RPC_MODE_SYNC;
+				rpc_mode = MultiplayerAPI::RPC_MODE_REMOTESYNC;
 				continue;
 			} break;
 			case GDScriptTokenizer::TK_PR_MASTERSYNC: {
@@ -4494,7 +4497,7 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 				rpc_mode = MultiplayerAPI::RPC_MODE_MASTERSYNC;
 				continue;
 			} break;
-			case GDScriptTokenizer::TK_PR_SLAVESYNC: {
+			case GDScriptTokenizer::TK_PR_PUPPETSYNC: {
 
 				//may be fallthrough from export, ignore if so
 				tokenizer->advance();
@@ -4506,7 +4509,7 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 					return;
 				}
 
-				rpc_mode = MultiplayerAPI::RPC_MODE_SLAVESYNC;
+				rpc_mode = MultiplayerAPI::RPC_MODE_PUPPETSYNC;
 				continue;
 			} break;
 			case GDScriptTokenizer::TK_PR_VAR: {
@@ -4536,14 +4539,14 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 				member.rpc_mode = rpc_mode;
 
 				if (current_class->constant_expressions.has(member.identifier)) {
-					_set_error("A constant named '" + String(member.identifier) + "' alread exists in this class (at line: " +
+					_set_error("A constant named '" + String(member.identifier) + "' already exists in this class (at line: " +
 							   itos(current_class->constant_expressions[member.identifier].expression->line) + ").");
 					return;
 				}
 
 				for (int i = 0; i < current_class->variables.size(); i++) {
 					if (current_class->variables[i].identifier == member.identifier) {
-						_set_error("Variable '" + String(member.identifier) + "' alread exists in this class (at line: " +
+						_set_error("Variable '" + String(member.identifier) + "' already exists in this class (at line: " +
 								   itos(current_class->variables[i].line) + ").");
 						return;
 					}
@@ -4750,14 +4753,14 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 				int line = tokenizer->get_token_line();
 
 				if (current_class->constant_expressions.has(const_id)) {
-					_set_error("Constant '" + String(const_id) + "' alread exists in this class (at line: " +
+					_set_error("Constant '" + String(const_id) + "' already exists in this class (at line: " +
 							   itos(current_class->constant_expressions[const_id].expression->line) + ").");
 					return;
 				}
 
 				for (int i = 0; i < current_class->variables.size(); i++) {
 					if (current_class->variables[i].identifier == const_id) {
-						_set_error("A variable named '" + String(const_id) + "' alread exists in this class (at line: " +
+						_set_error("A variable named '" + String(const_id) + "' already exists in this class (at line: " +
 								   itos(current_class->variables[i].line) + ").");
 						return;
 					}
@@ -4811,7 +4814,7 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 			case GDScriptTokenizer::TK_PR_ENUM: {
 				//multiple constant declarations..
 
-				int last_assign = -1; // Incremented by 1 right before the assingment.
+				int last_assign = -1; // Incremented by 1 right before the assignment.
 				String enum_name;
 				Dictionary enum_dict;
 
@@ -7243,7 +7246,7 @@ void GDScriptParser::_check_class_level_types(ClassNode *p_class) {
 						return;
 					}
 
-					// Replace assigment with implict conversion
+					// Replace assignment with implict conversion
 					BuiltInFunctionNode *convert = alloc_node<BuiltInFunctionNode>();
 					convert->line = v.line;
 					convert->function = GDScriptFunctions::TYPE_CONVERT;
@@ -7621,7 +7624,7 @@ void GDScriptParser::_check_block_types(BlockNode *p_block) {
 										lv->line);
 								return;
 							}
-							// Replace assigment with implict conversion
+							// Replace assignment with implict conversion
 							BuiltInFunctionNode *convert = alloc_node<BuiltInFunctionNode>();
 							convert->line = lv->line;
 							convert->function = GDScriptFunctions::TYPE_CONVERT;
@@ -7749,7 +7752,7 @@ void GDScriptParser::_check_block_types(BlockNode *p_block) {
 											op->line);
 									return;
 								}
-								// Replace assigment with implict conversion
+								// Replace assignment with implict conversion
 								BuiltInFunctionNode *convert = alloc_node<BuiltInFunctionNode>();
 								convert->line = op->line;
 								convert->function = GDScriptFunctions::TYPE_CONVERT;

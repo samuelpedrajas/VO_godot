@@ -160,6 +160,8 @@
 		<member name="application/boot_splash/scale" type="String" setter="" getter="">
 			Scale the boot splash image using the selected mode (will leave it as default pixel size if disabled).
 		</member>
+		<member name="application/boot_splash/bg_color" type="Color" setter="" getter="">
+		</member>
 		<member name="application/boot_splash/image" type="String" setter="" getter="">
 			Path to an image used for boot splash.
 		</member>
@@ -208,7 +210,7 @@
 		<member name="audio/output_latency" type="int" setter="" getter="">
 		</member>
 		<member name="audio/video_delay_compensation_ms" type="int" setter="" getter="">
-			Setting to harcode audio delay when playing video. Best to leave this untouched unless you know what you are doing.
+			Setting to hardcode audio delay when playing video. Best to leave this untouched unless you know what you are doing.
 		</member>
 		<member name="compression/formats/gzip/compression_level" type="int" setter="" getter="">
 			Default compression level for gzip. Affects compressed scenes and resources.
@@ -225,6 +227,8 @@
 		<member name="compression/formats/zstd/window_log_size" type="int" setter="" getter="">
 		</member>
 		<member name="debug/gdscript/warnings/constant_used_as_function" type="bool" setter="" getter="">
+		</member>
+		<member name="debug/gdscript/warnings/deprecated_keyword" type="bool" setter="" getter="">
 		</member>
 		<member name="debug/gdscript/warnings/enable" type="bool" setter="" getter="">
 		</member>
@@ -630,7 +634,7 @@
 			Fix to improve physics jitter, specially on monitors where refresh rate is different than physics FPS.
 		</member>
 		<member name="rendering/environment/default_clear_color" type="Color" setter="" getter="">
-			Default background clear color.
+			Default background clear color. Overridable per [Viewport] using its [Environment]. See [member Environment.background_mode] and [member Environment.background_color] in particular. To change this default color programmatically, use [method VisualServer.set_default_clear_color].
 		</member>
 		<member name="rendering/limits/buffers/blend_shape_max_buffer_size_kb" type="int" setter="" getter="">
 			Max buffer size for blend shapes. Any blend shape bigger than this will not work.

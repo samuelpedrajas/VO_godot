@@ -30,10 +30,10 @@
 
 #include "connections_dialog.h"
 
+#include "core/print_string.h"
 #include "editor_node.h"
 #include "editor_settings.h"
 #include "plugins/script_editor_plugin.h"
-#include "print_string.h"
 #include "scene/gui/label.h"
 #include "scene/gui/popup_menu.h"
 
@@ -341,8 +341,7 @@ ConnectDialog::ConnectDialog() {
 
 	vbc_right->add_margin_child(TTR("Add Extra Call Argument:"), add_bind_hb);
 
-	bind_editor = memnew(PropertyEditor);
-	bind_editor->hide_top_label();
+	bind_editor = memnew(EditorInspector);
 
 	vbc_right->add_margin_child(TTR("Extra Call Arguments:"), bind_editor, true);
 
@@ -498,7 +497,7 @@ void ConnectionsDock::_disconnect(TreeItem &item) {
 }
 
 /*
-Break all conections of currently selected signal.
+Break all connections of currently selected signal.
 Can undo-redo as a single action.
 */
 void ConnectionsDock::_disconnect_all() {

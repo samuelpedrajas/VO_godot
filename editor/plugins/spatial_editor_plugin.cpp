@@ -847,11 +847,7 @@ void SpatialEditorViewport::_list_select(Ref<InputEventMouseButton> b) {
 
 			Spatial *spat = selection_results[i].item;
 
-			Ref<Texture> icon;
-			if (spat->has_meta("_editor_icon"))
-				icon = spat->get_meta("_editor_icon");
-			else
-				icon = get_icon(has_icon(spat->get_class(), "EditorIcons") ? spat->get_class() : String("Object"), "EditorIcons");
+			Ref<Texture> icon = EditorNode::get_singleton()->get_object_icon(spat, "Node");
 
 			String node_path = "/" + root_name + "/" + root_path.rel_path_to(spat->get_path());
 
@@ -3271,7 +3267,6 @@ void SpatialEditorViewport::_perform_drop_data() {
 			files_str += error_files[i].get_file().get_basename() + ",";
 		}
 		files_str = files_str.substr(0, files_str.length() - 1);
-		accept->get_ok()->set_text(TTR("OK"));
 		accept->set_text(vformat(TTR("Error instancing scene from %s"), files_str.c_str()));
 		accept->popup_centered_minsize();
 	}
@@ -3352,7 +3347,6 @@ void SpatialEditorViewport::drop_data_fw(const Point2 &p_point, const Variant &p
 		if (root_node) {
 			list.push_back(root_node);
 		} else {
-			accept->get_ok()->set_text(TTR("OK"));
 			accept->set_text(TTR("No parent to instance a child at."));
 			accept->popup_centered_minsize();
 			_remove_preview();
@@ -3360,7 +3354,6 @@ void SpatialEditorViewport::drop_data_fw(const Point2 &p_point, const Variant &p
 		}
 	}
 	if (list.size() != 1) {
-		accept->get_ok()->set_text(TTR("OK"));
 		accept->set_text(TTR("This operation requires a single selected node."));
 		accept->popup_centered_minsize();
 		_remove_preview();
@@ -5290,6 +5283,8 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	tool_button[TOOL_MODE_SELECT]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_SELECT]->set_tooltip(TTR("Select Mode (Q)") + "\n" + keycode_get_string(KEY_MASK_CMD) + TTR("Drag: Rotate\nAlt+Drag: Move\nAlt+RMB: Depth list selection"));
 
+	hbc_menu->add_child(memnew(VSeparator));
+
 	tool_button[TOOL_MODE_MOVE] = memnew(ToolButton);
 	hbc_menu->add_child(tool_button[TOOL_MODE_MOVE]);
 	tool_button[TOOL_MODE_MOVE]->set_toggle_mode(true);
@@ -5314,6 +5309,8 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	tool_button[TOOL_MODE_SCALE]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_SCALE]->set_tooltip(TTR("Scale Mode (R)"));
 
+	hbc_menu->add_child(memnew(VSeparator));
+
 	tool_button[TOOL_MODE_LIST_SELECT] = memnew(ToolButton);
 	hbc_menu->add_child(tool_button[TOOL_MODE_LIST_SELECT]);
 	tool_button[TOOL_MODE_LIST_SELECT]->set_toggle_mode(true);
@@ -5334,8 +5331,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	tool_button[TOOL_UNLOCK_SELECTED]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_UNLOCK_SELECTED]->set_tooltip(TTR("Unlock the selected object (can be moved)."));
 
-	VSeparator *vs = memnew(VSeparator);
-	hbc_menu->add_child(vs);
+	hbc_menu->add_child(memnew(VSeparator));
 
 	tool_option_button[TOOL_OPT_LOCAL_COORDS] = memnew(ToolButton);
 	hbc_menu->add_child(tool_option_button[TOOL_OPT_LOCAL_COORDS]);
@@ -5357,8 +5353,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	sct = ED_GET_SHORTCUT("spatial_editor/snap").ptr()->get_as_text();
 	tool_option_button[TOOL_OPT_USE_SNAP]->set_tooltip(vformat(TTR("Snap Mode (%s)"), sct));
 
-	vs = memnew(VSeparator);
-	hbc_menu->add_child(vs);
+	hbc_menu->add_child(memnew(VSeparator));
 
 	// Drag and drop support;
 	preview_node = memnew(Spatial);
