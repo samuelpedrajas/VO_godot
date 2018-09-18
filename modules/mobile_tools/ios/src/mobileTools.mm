@@ -54,7 +54,7 @@ bool MobileTools::canShowRate() {
         return true;
     }
 
-    return true;
+    return false;
 }
 
 void MobileTools::rateInAppStore() {
