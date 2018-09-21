@@ -943,6 +943,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 			OS::get_singleton()->set_screen_orientation(OS::SCREEN_SENSOR_PORTRAIT);
 		else if (orientation == "sensor")
 			OS::get_singleton()->set_screen_orientation(OS::SCREEN_SENSOR);
+		else if (orientation == "user")
+			OS::get_singleton()->set_screen_orientation(OS::SCREEN_USER);
 		else
 			OS::get_singleton()->set_screen_orientation(OS::SCREEN_LANDSCAPE);
 	}

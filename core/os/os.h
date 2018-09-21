@@ -428,6 +428,7 @@ public:
 		SCREEN_SENSOR_LANDSCAPE,
 		SCREEN_SENSOR_PORTRAIT,
 		SCREEN_SENSOR,
+		SCREEN_USER,
 	};
 
 	virtual void set_screen_orientation(ScreenOrientation p_orientation);

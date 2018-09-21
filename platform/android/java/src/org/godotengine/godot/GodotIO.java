@@ -71,6 +71,7 @@ public class GodotIO {
 	final int SCREEN_SENSOR_LANDSCAPE = 4;
 	final int SCREEN_SENSOR_PORTRAIT = 5;
 	final int SCREEN_SENSOR = 6;
+	final int SCREEN_USER = 7;
 
 	/////////////////////////
 	/// FILES
@@ -550,6 +551,9 @@ public class GodotIO {
 			} break;
 			case SCREEN_SENSOR: {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+			} break;
+			case SCREEN_USER: {
+				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
 			} break;
 		}
 	};

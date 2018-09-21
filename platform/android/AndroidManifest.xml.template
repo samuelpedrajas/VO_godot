@@ -15,7 +15,7 @@
                   android:label="@string/godot_project_name_string"
                   android:theme="@style/LauncherTheme"
                   android:launchMode="singleTask"
-                  android:screenOrientation="portrait"
+                  android:screenOrientation="user"
                   android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
                   android:resizeableActivity="false">
 

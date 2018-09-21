@@ -845,6 +845,9 @@
 		<constant name="SCREEN_ORIENTATION_SENSOR" value="6" enum="ScreenOrientation">
 			Uses most suitable orientation based on the hardware sensor.
 		</constant>
+		<constant name="SCREEN_USER" value="6" enum="ScreenOrientation">
+			Uses SO configuration.
+		</constant>
 		<constant name="SYSTEM_DIR_DESKTOP" value="0" enum="SystemDir">
 			Desktop directory path.
 		</constant>
