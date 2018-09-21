@@ -314,3 +314,4 @@ platform/windows/godot_res.res
 .scons_node_count
 misc/dist/ios_xcode/
 
+modules/admob/ios/lib/GoogleMobileAds.framework/*
