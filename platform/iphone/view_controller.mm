@@ -108,6 +108,8 @@ int add_cmdline(int p_argc, char **p_args) {
 			return UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown;
 		case OS::SCREEN_SENSOR:
 			return UIInterfaceOrientationMaskAll;
+		case OS::SCREEN_USER:
+			return UIInterfaceOrientationMaskAll;
 		case OS::SCREEN_LANDSCAPE:
 			return UIInterfaceOrientationMaskLandscapeLeft;
 	}

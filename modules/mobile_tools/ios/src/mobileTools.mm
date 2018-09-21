@@ -135,6 +135,18 @@ float MobileTools::getDiagonalInches() {
     return sqrt(pow(horizontal, 2) + pow(vertical, 2));
 }
 
+
+float MobileTools::getDeviceHeight() {
+    float ppi = pixelsPerInch();
+    return [[UIScreen mainScreen] bounds].size.height * (ppi / getPointDivisor());
+}
+
+
+float MobileTools::getDeviceWidth() {
+    float ppi = pixelsPerInch();
+    return [[UIScreen mainScreen] bounds].size.width * (ppi / getPointDivisor());
+}
+
 void MobileTools::_bind_methods() {
 #if VERSION_MAJOR == 3
     ClassDB::bind_method(D_METHOD("shareText"), &MobileTools::shareText);
@@ -145,6 +157,8 @@ void MobileTools::_bind_methods() {
     ClassDB::bind_method(D_METHOD("getDiagonal"), &MobileTools::getDiagonal);
     ClassDB::bind_method(D_METHOD("getDiagonalInches"), &MobileTools::getDiagonalInches);
     ClassDB::bind_method(D_METHOD("pixelsPerInch"), &MobileTools::pixelsPerInch);
+    ClassDB::bind_method(D_METHOD("getDeviceHeight"), &MobileTools::getDeviceHeight);
+    ClassDB::bind_method(D_METHOD("getDeviceWidth"), &MobileTools::getDeviceWidth);
 #else
     ObjectTypeDB::bind_method("shareText", &MobileTools::shareText);
     ObjectTypeDB::bind_method("sharePic", &MobileTools::sharePic);
@@ -154,6 +168,9 @@ void MobileTools::_bind_methods() {
     ObjectTypeDB::bind_method("getDiagonal", &MobileTools::getDiagonal);
     ObjectTypeDB::bind_method("getDiagonalInches", &MobileTools::getDiagonalInches);
     ObjectTypeDB::bind_method("pixelsPerInch", &MobileTools::pixelsPerInch);
+    ObjectTypeDB::bind_method("getDeviceHeight", &MobileTools::getDeviceHeight);
+    ObjectTypeDB::bind_method("getDeviceWidth", &MobileTools::getDeviceWidth);
+
 #endif
     
 }

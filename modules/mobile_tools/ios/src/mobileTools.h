@@ -29,6 +29,8 @@ public:
     float getDiagonal();
     float getDiagonalInches();
     float pixelsPerInch();
+    float getDeviceHeight();
+    float getDeviceWidth();
 
     MobileTools();
     ~MobileTools();
