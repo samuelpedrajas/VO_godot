@@ -16,7 +16,7 @@
 - (void)showBanner;
 - (void)hideBanner;
 - (void)resize;
-- (int)pointsToPixels:(int)points:(int)screenHeight;
-- (int)getBannerHeight:(int)screenHeight;
+- (int)pointsToPixels:(int)points;
+- (int)getBannerHeight;
 
 @end

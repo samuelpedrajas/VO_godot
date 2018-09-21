@@ -86,6 +86,7 @@ int add_cmdline(int p_argc, char **p_args) {
 - (BOOL)shouldAutorotate {
 	switch (OS::get_singleton()->get_screen_orientation()) {
 		case OS::SCREEN_SENSOR:
+		case OS::SCREEN_USER:
 		case OS::SCREEN_SENSOR_LANDSCAPE:
 		case OS::SCREEN_SENSOR_PORTRAIT:
 			return YES;
@@ -107,7 +108,6 @@ int add_cmdline(int p_argc, char **p_args) {
 		case OS::SCREEN_SENSOR_PORTRAIT:
 			return UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown;
 		case OS::SCREEN_SENSOR:
-			return UIInterfaceOrientationMaskAll;
 		case OS::SCREEN_USER:
 			return UIInterfaceOrientationMaskAll;
 		case OS::SCREEN_LANDSCAPE:
