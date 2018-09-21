@@ -81,8 +81,11 @@ bool GDScriptParser::_enter_indent_block(BlockNode *p_block) {
 	}
 	tokenizer->advance();
 
-	if (tokenizer->get_token() != GDScriptTokenizer::TK_NEWLINE) {
+	if (tokenizer->get_token() == GDScriptTokenizer::TK_EOF) {
+		return false;
+	}
 
+	if (tokenizer->get_token() != GDScriptTokenizer::TK_NEWLINE) {
 		// be more python-like
 		int current = tab_level.back()->get();
 		tab_level.push_back(current);
@@ -92,10 +95,11 @@ bool GDScriptParser::_enter_indent_block(BlockNode *p_block) {
 	}
 
 	while (true) {
-
 		if (tokenizer->get_token() != GDScriptTokenizer::TK_NEWLINE) {
 
 			return false; //wtf
+		} else if (tokenizer->get_token(1) == GDScriptTokenizer::TK_EOF) {
+			return false;
 		} else if (tokenizer->get_token(1) != GDScriptTokenizer::TK_NEWLINE) {
 
 			int indent = tokenizer->get_token_line_indent();
@@ -637,9 +641,21 @@ GDScriptParser::Node *GDScriptParser::_parse_expression(Node *p_parent, bool p_s
 
 					expr = op;
 				} else {
-
-					_set_error("Static constant  '" + identifier.operator String() + "' not present in built-in type " + Variant::get_type_name(bi_type) + ".");
-					return NULL;
+					// Object is a special case
+					bool valid = false;
+					if (bi_type == Variant::OBJECT) {
+						int object_constant = ClassDB::get_integer_constant("Object", identifier, &valid);
+						if (valid) {
+							ConstantNode *cn = alloc_node<ConstantNode>();
+							cn->value = object_constant;
+							cn->datatype = _type_from_variant(cn->value);
+							expr = cn;
+						}
+					}
+					if (!valid) {
+						_set_error("Static constant  '" + identifier.operator String() + "' not present in built-in type " + Variant::get_type_name(bi_type) + ".");
+						return NULL;
+					}
 				}
 			} else {
 
@@ -4851,6 +4867,20 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 
 						StringName const_id = tokenizer->get_token_literal();
 
+						if (current_class->constant_expressions.has(const_id)) {
+							_set_error("A constant named '" + String(const_id) + "' already exists in this class (at line: " +
+									   itos(current_class->constant_expressions[const_id].expression->line) + ").");
+							return;
+						}
+
+						for (int i = 0; i < current_class->variables.size(); i++) {
+							if (current_class->variables[i].identifier == const_id) {
+								_set_error("A variable named '" + String(const_id) + "' already exists in this class (at line: " +
+										   itos(current_class->variables[i].line) + ").");
+								return;
+							}
+						}
+
 						tokenizer->advance();
 
 						if (tokenizer->get_token() == GDScriptTokenizer::TK_OP_ASSIGN) {
@@ -7204,6 +7234,12 @@ void GDScriptParser::_check_class_level_types(ClassNode *p_class) {
 		expr.is_constant = true;
 		c.type = expr;
 		c.expression->set_datatype(expr);
+
+		DataType tmp;
+		if (_get_member_type(p_class->base_type, E->key(), tmp)) {
+			_set_error("Member '" + String(E->key()) + "' already exists in parent class.", c.expression->line);
+			return;
+		}
 	}
 
 	// Function declarations

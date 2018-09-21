@@ -1189,6 +1189,7 @@ static bool _guess_identifier_type(const GDScriptCompletionContext &p_context, c
 				c.line = op->line;
 				c.block = blk;
 				if (_guess_expression_type(p_context, op->arguments[1], r_type)) {
+					r_type.type.is_meta_type = false;
 					return true;
 				}
 			}
@@ -1221,7 +1222,7 @@ static bool _guess_identifier_type(const GDScriptCompletionContext &p_context, c
 
 				int def_from = p_context.function->arguments.size() - p_context.function->default_values.size();
 				if (i >= def_from) {
-					int def_idx = def_from - i;
+					int def_idx = i - def_from;
 					if (p_context.function->default_values[def_idx]->type == GDScriptParser::Node::TYPE_OPERATOR) {
 						const GDScriptParser::OperatorNode *op = static_cast<const GDScriptParser::OperatorNode *>(p_context.function->default_values[def_idx]);
 						if (op->arguments.size() < 2) {
@@ -1376,11 +1377,11 @@ static bool _guess_identifier_type_from_base(const GDScriptCompletionContext &p_
 					for (int i = 0; i < base_type.class_type->variables.size(); i++) {
 						GDScriptParser::ClassNode::Member m = base_type.class_type->variables[i];
 						if (m.identifier == p_identifier) {
-							if (m.data_type.has_type) {
-								r_type.type = m.data_type;
-								return true;
-							}
 							if (m.expression) {
+								if (p_context.line == m.expression->line) {
+									// Variable used in the same expression
+									return false;
+								}
 								if (_guess_expression_type(p_context, m.expression, r_type)) {
 									return true;
 								}
@@ -1388,6 +1389,10 @@ static bool _guess_identifier_type_from_base(const GDScriptCompletionContext &p_
 									r_type.type = m.expression->get_datatype();
 									return true;
 								}
+							}
+							if (m.data_type.has_type) {
+								r_type.type = m.data_type;
+								return true;
 							}
 							return false;
 						}

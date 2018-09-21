@@ -71,8 +71,7 @@ class CanvasItemEditor : public VBoxContainer {
 
 	GDCLASS(CanvasItemEditor, VBoxContainer);
 
-	EditorNode *editor;
-
+public:
 	enum Tool {
 		TOOL_SELECT,
 		TOOL_LIST_SELECT,
@@ -83,6 +82,9 @@ class CanvasItemEditor : public VBoxContainer {
 		TOOL_PAN,
 		TOOL_MAX
 	};
+
+private:
+	EditorNode *editor;
 
 	enum MenuOption {
 		SNAP_USE,
@@ -103,6 +105,7 @@ class CanvasItemEditor : public VBoxContainer {
 		SHOW_GUIDES,
 		SHOW_ORIGIN,
 		SHOW_VIEWPORT,
+		SHOW_EDIT_LOCKS,
 		LOCK_SELECTED,
 		UNLOCK_SELECTED,
 		GROUP_SELECTED,
@@ -223,6 +226,7 @@ class CanvasItemEditor : public VBoxContainer {
 	bool show_origin;
 	bool show_viewport;
 	bool show_helpers;
+	bool show_edit_locks;
 	float zoom;
 	Point2 view_offset;
 	Point2 previous_update_view_offset;
@@ -373,7 +377,9 @@ class CanvasItemEditor : public VBoxContainer {
 
 	void _add_canvas_item(CanvasItem *p_canvas_item);
 
+	void _save_canvas_item_ik_chain(const CanvasItem *p_canvas_item, List<float> *p_bones_length, List<Dictionary> *p_bones_state);
 	void _save_canvas_item_state(List<CanvasItem *> p_canvas_items, bool save_bones = false);
+	void _restore_canvas_item_ik_chain(CanvasItem *p_canvas_item, const List<Dictionary> *p_bones_state);
 	void _restore_canvas_item_state(List<CanvasItem *> p_canvas_items, bool restore_bones = false);
 	void _commit_canvas_item_state(List<CanvasItem *> p_canvas_items, String action_name, bool commit_bones = false);
 
@@ -534,6 +540,8 @@ public:
 	VSplitContainer *get_bottom_split();
 
 	Control *get_viewport_control() { return viewport; }
+
+	Tool get_current_tool() { return tool; }
 
 	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo = p_undo_redo; }
 	void edit(CanvasItem *p_canvas_item);

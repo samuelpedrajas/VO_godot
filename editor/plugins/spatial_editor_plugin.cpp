@@ -2312,12 +2312,12 @@ void SpatialEditorViewport::_draw() {
 
 	EditorPluginList *over_plugin_list = EditorNode::get_singleton()->get_editor_plugins_over();
 	if (!over_plugin_list->empty()) {
-		over_plugin_list->forward_draw_over_viewport(surface);
+		over_plugin_list->forward_spatial_draw_over_viewport(surface);
 	}
 
 	EditorPluginList *force_over_plugin_list = editor->get_editor_plugins_force_over();
 	if (!force_over_plugin_list->empty()) {
-		force_over_plugin_list->forward_force_draw_over_viewport(surface);
+		force_over_plugin_list->forward_spatial_force_draw_over_viewport(surface);
 	}
 
 	if (surface->has_focus()) {
@@ -2346,7 +2346,6 @@ void SpatialEditorViewport::_draw() {
 		Point2 center = _point_to_screen(_edit.center);
 		VisualServer::get_singleton()->canvas_item_add_line(ci, _edit.mouse_pos, center, Color(0.4, 0.7, 1.0, 0.8));
 	}
-
 	if (previewing) {
 
 		Size2 ss = Size2(ProjectSettings::get_singleton()->get("display/window/size/width"), ProjectSettings::get_singleton()->get("display/window/size/height"));
@@ -4418,6 +4417,8 @@ void SpatialEditor::_menu_item_pressed(int p_option) {
 void SpatialEditor::_init_indicators() {
 
 	{
+		origin_enabled = true;
+		grid_enabled = true;
 
 		indicator_mat.instance();
 		indicator_mat->set_flag(SpatialMaterial::FLAG_UNSHADED, true);
@@ -4458,10 +4459,6 @@ void SpatialEditor::_init_indicators() {
 		VS::get_singleton()->instance_set_layer_mask(origin_instance, 1 << SpatialEditorViewport::GIZMO_GRID_LAYER);
 
 		VisualServer::get_singleton()->instance_geometry_set_cast_shadows_setting(origin_instance, VS::SHADOW_CASTING_SETTING_OFF);
-
-		origin_enabled = true;
-		grid_enabled = true;
-		last_grid_snap = 1;
 	}
 
 	{
@@ -5586,7 +5583,6 @@ void SpatialEditorPlugin::make_visible(bool p_visible) {
 
 		spatial_editor->show();
 		spatial_editor->set_process(true);
-		spatial_editor->grab_focus();
 
 	} else {
 

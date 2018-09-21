@@ -830,6 +830,8 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			editor_data->get_undo_redo().add_undo_method(editor, "set_edited_scene", (Object *)NULL);
 			editor_data->get_undo_redo().commit_action();
 
+			editor->edit_node(new_node);
+
 		} break;
 
 		default: {
@@ -2401,7 +2403,6 @@ SceneTreeDock::SceneTreeDock(EditorNode *p_editor, Node *p_scene_root, EditorSel
 	add_child(create_dialog);
 	create_dialog->connect("create", this, "_create");
 	create_dialog->connect("favorites_updated", this, "_update_create_root_dialog");
-	EditorFileSystem::get_singleton()->connect("script_classes_updated", create_dialog, "_save_and_update_favorite_list");
 
 	rename_dialog = memnew(RenameDialog(scene_tree, &editor_data->get_undo_redo()));
 	add_child(rename_dialog);
