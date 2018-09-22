@@ -31,6 +31,7 @@ public:
     float pixelsPerInch();
     float getDeviceHeight();
     float getDeviceWidth();
+    void attemptRotationToDeviceOrientation();
 
     MobileTools();
     ~MobileTools();

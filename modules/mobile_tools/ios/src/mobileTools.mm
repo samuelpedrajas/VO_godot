@@ -147,6 +147,10 @@ float MobileTools::getDeviceWidth() {
     return [[UIScreen mainScreen] bounds].size.width * (ppi / getPointDivisor());
 }
 
+void MobileTools::attemptRotationToDeviceOrientation() {
+    [UIViewController attemptRotationToDeviceOrientation];
+}
+
 void MobileTools::_bind_methods() {
 #if VERSION_MAJOR == 3
     ClassDB::bind_method(D_METHOD("shareText"), &MobileTools::shareText);
@@ -159,6 +163,7 @@ void MobileTools::_bind_methods() {
     ClassDB::bind_method(D_METHOD("pixelsPerInch"), &MobileTools::pixelsPerInch);
     ClassDB::bind_method(D_METHOD("getDeviceHeight"), &MobileTools::getDeviceHeight);
     ClassDB::bind_method(D_METHOD("getDeviceWidth"), &MobileTools::getDeviceWidth);
+    ClassDB::bind_method(D_METHOD("attemptRotationToDeviceOrientation"), &MobileTools::attemptRotationToDeviceOrientation);
 #else
     ObjectTypeDB::bind_method("shareText", &MobileTools::shareText);
     ObjectTypeDB::bind_method("sharePic", &MobileTools::sharePic);
@@ -170,7 +175,7 @@ void MobileTools::_bind_methods() {
     ObjectTypeDB::bind_method("pixelsPerInch", &MobileTools::pixelsPerInch);
     ObjectTypeDB::bind_method("getDeviceHeight", &MobileTools::getDeviceHeight);
     ObjectTypeDB::bind_method("getDeviceWidth", &MobileTools::getDeviceWidth);
-
+    ObjectTypeDB::bind_method("attemptRotationToDeviceOrientation", &MobileTools::attemptRotationToDeviceOrientation);
 #endif
     
 }
