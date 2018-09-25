@@ -139,6 +139,13 @@ void MobileTools::attemptRotationToDeviceOrientation() {
     [UIViewController attemptRotationToDeviceOrientation];
 }
 
+bool MobileTools::isIphone() {
+    if UIDevice.current.userInterfaceIdiom == .pad {
+        return false;
+    }
+    return true;
+}
+
 void MobileTools::_bind_methods() {
 #if VERSION_MAJOR == 3
     ClassDB::bind_method(D_METHOD("shareText"), &MobileTools::shareText);
@@ -150,6 +157,7 @@ void MobileTools::_bind_methods() {
     ClassDB::bind_method(D_METHOD("getDiagonalInches"), &MobileTools::getDiagonalInches);
     ClassDB::bind_method(D_METHOD("pixelsPerInch"), &MobileTools::pixelsPerInch);
     ClassDB::bind_method(D_METHOD("attemptRotationToDeviceOrientation"), &MobileTools::attemptRotationToDeviceOrientation);
+    ClassDB::bind_method(D_METHOD("isIphone"), &MobileTools::isIphone);
 #else
     ObjectTypeDB::bind_method("shareText", &MobileTools::shareText);
     ObjectTypeDB::bind_method("sharePic", &MobileTools::sharePic);
@@ -160,6 +168,7 @@ void MobileTools::_bind_methods() {
     ObjectTypeDB::bind_method("getDiagonalInches", &MobileTools::getDiagonalInches);
     ObjectTypeDB::bind_method("pixelsPerInch", &MobileTools::pixelsPerInch);
     ObjectTypeDB::bind_method("attemptRotationToDeviceOrientation", &MobileTools::attemptRotationToDeviceOrientation);
+    ObjectTypeDB::bind_method("isIphone", &MobileTools::isIphone);
 #endif
     
 }
