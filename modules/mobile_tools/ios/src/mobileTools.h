@@ -29,8 +29,6 @@ public:
     float getDiagonal();
     float getDiagonalInches();
     float pixelsPerInch();
-    float getDeviceHeight();
-    float getDeviceWidth();
     void attemptRotationToDeviceOrientation();
 
     MobileTools();
