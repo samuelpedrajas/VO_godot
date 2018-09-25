@@ -116,11 +116,9 @@
 - (int) getBannerHeight {
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     if (orientation == 0 || orientation == UIInterfaceOrientationPortrait) { //portrait
-        NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerPortrait.size.height);
         return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerPortrait).height];
     }
 
-    NSLog(@"GADAdSize: %f", kGADAdSizeSmartBannerLandscape.size.height);
     return [self pointsToPixels:CGSizeFromGADAdSize(kGADAdSizeSmartBannerLandscape).height];
 }
 

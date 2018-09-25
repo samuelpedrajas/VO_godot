@@ -140,7 +140,9 @@ void MobileTools::attemptRotationToDeviceOrientation() {
 }
 
 bool MobileTools::isIphone() {
-    if UIDevice.current.userInterfaceIdiom == .pad {
+    NSString *deviceModel = (NSString*)[UIDevice currentDevice].model;
+
+    if ([deviceModel rangeOfString:@"iPad"].location != NSNotFound)  {
         return false;
     }
     return true;

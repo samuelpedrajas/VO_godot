@@ -30,7 +30,7 @@ public:
     float getDiagonalInches();
     float pixelsPerInch();
     void attemptRotationToDeviceOrientation();
-    void isIphone();
+    bool isIphone();
 
     MobileTools();
     ~MobileTools();
