@@ -15,7 +15,6 @@ MobileTools::~MobileTools() {
 }
 
 
-
 void MobileTools::shareText(const String &title, const String &subject, const String &text) {
     
     ViewController *root_controller = (ViewController *)((AppDelegate *)[[UIApplication sharedApplication] delegate]).window.rootViewController;
@@ -148,6 +147,33 @@ bool MobileTools::isIphone() {
     return true;
 }
 
+bool MobileTools::theresSafeArea() {
+    struct utsname sysinfo;
+
+    if (uname(&sysinfo) == 0) {
+        NSString *my_device_model = [NSString stringWithUTF8String:sysinfo.machine];
+
+        NSArray *X_SERIES = [NSArray arrayWithObjects: @"iPhone11,8", @"iPhone11,6", @"iPhone11,4", @"iPhone11,2", @"iPhone10,6", @"iPhone10,3", nil];
+        int i;
+        int count = [X_SERIES count];
+        for (i = 0; i < count; i++) {
+            NSString *device_model = X_SERIES[i];
+            if ([my_device_model isEqualToString:device_model]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+float MobileTools::getSafeMarginBottom() {
+    return 34.0 * [UIScreen mainScreen].scale;
+}
+
+float MobileTools::getSafeMarginTop() {
+    return 44.0 * [UIScreen mainScreen].scale;
+}
+
 void MobileTools::_bind_methods() {
 #if VERSION_MAJOR == 3
     ClassDB::bind_method(D_METHOD("shareText"), &MobileTools::shareText);
@@ -160,6 +186,9 @@ void MobileTools::_bind_methods() {
     ClassDB::bind_method(D_METHOD("pixelsPerInch"), &MobileTools::pixelsPerInch);
     ClassDB::bind_method(D_METHOD("attemptRotationToDeviceOrientation"), &MobileTools::attemptRotationToDeviceOrientation);
     ClassDB::bind_method(D_METHOD("isIphone"), &MobileTools::isIphone);
+    ClassDB::bind_method(D_METHOD("theresSafeArea"), &MobileTools::theresSafeArea);
+    ClassDB::bind_method(D_METHOD("getSafeMarginBottom"), &MobileTools::getSafeMarginBottom);
+    ClassDB::bind_method(D_METHOD("getSafeMarginTop"), &MobileTools::getSafeMarginTop);
 #else
     ObjectTypeDB::bind_method("shareText", &MobileTools::shareText);
     ObjectTypeDB::bind_method("sharePic", &MobileTools::sharePic);
@@ -171,6 +200,9 @@ void MobileTools::_bind_methods() {
     ObjectTypeDB::bind_method("pixelsPerInch", &MobileTools::pixelsPerInch);
     ObjectTypeDB::bind_method("attemptRotationToDeviceOrientation", &MobileTools::attemptRotationToDeviceOrientation);
     ObjectTypeDB::bind_method("isIphone", &MobileTools::isIphone);
+    ObjectTypeDB::bind_method("theresSafeArea", &MobileTools::theresSafeArea);
+    ObjectTypeDB::bind_method("getSafeMarginBottom", &MobileTools::getSafeMarginBottom);
+    ObjectTypeDB::bind_method("getSafeMarginTop", &MobileTools::getSafeMarginTop);
 #endif
     
 }

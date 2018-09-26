@@ -31,6 +31,9 @@ public:
     float pixelsPerInch();
     void attemptRotationToDeviceOrientation();
     bool isIphone();
+    bool theresSafeArea();
+    float getSafeMarginBottom();
+    float getSafeMarginTop();
 
     MobileTools();
     ~MobileTools();
