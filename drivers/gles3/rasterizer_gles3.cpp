@@ -268,7 +268,7 @@ void RasterizerGLES3::clear_render_target(const Color &p_color) {
 	storage->frame.clear_request_color = p_color;
 }
 
-void RasterizerGLES3::set_boot_image(const Ref<Image> &p_image, const Color &p_color, bool p_scale) {
+void RasterizerGLES3::set_boot_image(const Ref<Image> &p_image, const Color &p_color, VisualServer::SplashStretchMode p_stretch_mode) {
 
 	if (p_image.is_null() || p_image->empty())
 		return;
@@ -296,14 +296,41 @@ void RasterizerGLES3::set_boot_image(const Ref<Image> &p_image, const Color &p_c
 
 	Rect2 imgrect(0, 0, p_image->get_width(), p_image->get_height());
 	Rect2 screenrect;
-	if (p_scale) {
 
+	if (p_stretch_mode == VisualServer::SPLASH_STRETCH_MODE_KEEP_HEIGHT) {
+		//scale horizontally
+		screenrect.size.y = window_h;
+		screenrect.size.x = imgrect.size.x * window_h / imgrect.size.y;
+		screenrect.position.x = (window_w - screenrect.size.x) / 2;
+	} else if (p_stretch_mode == VisualServer::SPLASH_STRETCH_MODE_KEEP_WIDTH) {
+		//scale vertically
+		screenrect.size.x = window_w;
+		screenrect.size.y = imgrect.size.y * window_w / imgrect.size.x;
+		screenrect.position.y = (window_h - screenrect.size.y) / 2;
+	} else if (p_stretch_mode == VisualServer::SPLASH_STRETCH_MODE_COVER) {
+		double window_aspect = (double)window_w / window_h;
+		double img_aspect = imgrect.size.x / imgrect.size.y;
+
+		if (window_aspect > img_aspect) {
+			//scale vertically
+			screenrect.size.x = window_w;
+			screenrect.size.y = imgrect.size.y * window_w / imgrect.size.x;
+			screenrect.position.y = (window_h - screenrect.size.y) / 2;
+		} else {
+			//scale horizontally
+			screenrect.size.y = window_h;
+			screenrect.size.x = imgrect.size.x * window_h / imgrect.size.y;
+			screenrect.position.x = (window_w - screenrect.size.x) / 2;
+		}
+	} else if (p_stretch_mode == VisualServer::SPLASH_STRETCH_MODE_EXPAND) {
+		screenrect.size.x = window_w;
+		screenrect.size.y = window_h;
+	} else if (p_stretch_mode == VisualServer::SPLASH_STRETCH_MODE_KEEP) {
 		if (window_w > window_h) {
 			//scale horizontally
 			screenrect.size.y = window_h;
 			screenrect.size.x = imgrect.size.x * window_h / imgrect.size.y;
 			screenrect.position.x = (window_w - screenrect.size.x) / 2;
-
 		} else {
 			//scale vertically
 			screenrect.size.x = window_w;
@@ -311,7 +338,6 @@ void RasterizerGLES3::set_boot_image(const Ref<Image> &p_image, const Color &p_c
 			screenrect.position.y = (window_h - screenrect.size.y) / 2;
 		}
 	} else {
-
 		screenrect = imgrect;
 		screenrect.position += ((Size2(window_w, window_h) - screenrect.size) / 2.0).floor();
 	}

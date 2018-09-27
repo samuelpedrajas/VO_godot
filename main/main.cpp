@@ -1117,7 +1117,17 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 
 	if (show_logo) { //boot logo!
 		String boot_logo_path = GLOBAL_DEF("application/boot_splash/image", String());
+
 		bool boot_logo_scale = GLOBAL_DEF("application/boot_splash/fullsize", true);
+
+		// default to "keep" to ensure backwards compatibility
+		String boot_stretch_mode = GLOBAL_DEF("application/boot_splash/stretch_mode", "keep");
+		ProjectSettings::get_singleton()->set_custom_property_info("application/boot_splash/stretch_mode", PropertyInfo(Variant::STRING, "application/boot_splash/stretch_mode", PROPERTY_HINT_ENUM, "keep,keep_width,keep_height,cover,expand"));
+
+		if (!boot_logo_scale) {
+			boot_stretch_mode = "disabled";
+		}
+
 		ProjectSettings::get_singleton()->set_custom_property_info("application/boot_splash/image", PropertyInfo(Variant::STRING, "application/boot_splash/image", PROPERTY_HINT_FILE, "*.png"));
 
 		Ref<Image> boot_logo;
@@ -1135,7 +1145,20 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 		Color boot_bg_color = GLOBAL_DEF("application/boot_splash/bg_color", boot_splash_bg_color);
 		if (boot_logo.is_valid()) {
 			OS::get_singleton()->_msec_splash = OS::get_singleton()->get_ticks_msec();
-			VisualServer::get_singleton()->set_boot_image(boot_logo, boot_bg_color, boot_logo_scale);
+
+			VisualServer::SplashStretchMode vs_boot_stretch_mode = VisualServer::SPLASH_STRETCH_MODE_DISABLED;
+			if (boot_stretch_mode == "keep")
+				vs_boot_stretch_mode = VisualServer::SPLASH_STRETCH_MODE_KEEP;
+			else if (boot_stretch_mode == "keep_width")
+				vs_boot_stretch_mode = VisualServer::SPLASH_STRETCH_MODE_KEEP_WIDTH;
+			else if (boot_stretch_mode == "keep_height")
+				vs_boot_stretch_mode = VisualServer::SPLASH_STRETCH_MODE_KEEP_HEIGHT;
+			else if (boot_stretch_mode == "cover")
+				vs_boot_stretch_mode = VisualServer::SPLASH_STRETCH_MODE_COVER;
+			else if (boot_stretch_mode == "expand")
+				vs_boot_stretch_mode = VisualServer::SPLASH_STRETCH_MODE_EXPAND;
+
+			VisualServer::get_singleton()->set_boot_image(boot_logo, boot_bg_color, vs_boot_stretch_mode);
 
 		} else {
 #ifndef NO_DEFAULT_BOOT_LOGO
@@ -1149,7 +1172,7 @@ Error Main::setup2(Thread::ID p_main_tid_override) {
 			MAIN_PRINT("Main: ClearColor");
 			VisualServer::get_singleton()->set_default_clear_color(boot_bg_color);
 			MAIN_PRINT("Main: Image");
-			VisualServer::get_singleton()->set_boot_image(splash, boot_bg_color, false);
+			VisualServer::get_singleton()->set_boot_image(splash, boot_bg_color, VisualServer::SPLASH_STRETCH_MODE_DISABLED);
 #endif
 		}
 

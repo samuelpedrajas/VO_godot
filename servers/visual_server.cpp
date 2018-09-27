@@ -2041,7 +2041,7 @@ void VisualServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_test_texture"), &VisualServer::get_test_texture);
 	ClassDB::bind_method(D_METHOD("get_white_texture"), &VisualServer::get_white_texture);
 
-	ClassDB::bind_method(D_METHOD("set_boot_image", "image", "color", "scale"), &VisualServer::set_boot_image);
+	ClassDB::bind_method(D_METHOD("set_boot_image", "image", "color", "stretch_mode"), &VisualServer::set_boot_image);
 	ClassDB::bind_method(D_METHOD("set_default_clear_color", "color"), &VisualServer::set_default_clear_color);
 
 	ClassDB::bind_method(D_METHOD("has_feature", "feature"), &VisualServer::has_feature);
@@ -2295,6 +2295,13 @@ void VisualServer::_bind_methods() {
 	BIND_ENUM_CONSTANT(ENV_SSAO_BLUR_1x1);
 	BIND_ENUM_CONSTANT(ENV_SSAO_BLUR_2x2);
 	BIND_ENUM_CONSTANT(ENV_SSAO_BLUR_3x3);
+
+	BIND_ENUM_CONSTANT(SPLASH_STRETCH_MODE_KEEP);
+	BIND_ENUM_CONSTANT(SPLASH_STRETCH_MODE_KEEP_WIDTH);
+	BIND_ENUM_CONSTANT(SPLASH_STRETCH_MODE_KEEP_HEIGHT);
+	BIND_ENUM_CONSTANT(SPLASH_STRETCH_MODE_COVER);
+	BIND_ENUM_CONSTANT(SPLASH_STRETCH_MODE_EXPAND);
+	BIND_ENUM_CONSTANT(SPLASH_STRETCH_MODE_DISABLED);
 
 	ADD_SIGNAL(MethodInfo("frame_pre_draw"));
 	ADD_SIGNAL(MethodInfo("frame_post_draw"));
