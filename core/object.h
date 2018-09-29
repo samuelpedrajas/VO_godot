@@ -116,6 +116,7 @@ enum PropertyUsageFlags {
 	PROPERTY_USAGE_NIL_IS_VARIANT = 1 << 19,
 	PROPERTY_USAGE_INTERNAL = 1 << 20,
 	PROPERTY_USAGE_DO_NOT_SHARE_ON_DUPLICATE = 1 << 21, // If the object is duplicated also this property will be duplicated
+	PROPERTY_USAGE_HIGH_END_GFX = 1 << 22,
 
 	PROPERTY_USAGE_DEFAULT = PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_NETWORK,
 	PROPERTY_USAGE_DEFAULT_INTL = PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_NETWORK | PROPERTY_USAGE_INTERNATIONALIZED,
@@ -187,11 +188,11 @@ Array convert_property_list(const List<PropertyInfo> *p_list);
 struct MethodInfo {
 
 	String name;
-	List<PropertyInfo> arguments;
-	Vector<Variant> default_arguments;
 	PropertyInfo return_val;
 	uint32_t flags;
 	int id;
+	List<PropertyInfo> arguments;
+	Vector<Variant> default_arguments;
 
 	inline bool operator==(const MethodInfo &p_method) const { return id == p_method.id; }
 	inline bool operator<(const MethodInfo &p_method) const { return id == p_method.id ? (name < p_method.name) : (id < p_method.id); }

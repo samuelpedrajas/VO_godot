@@ -123,6 +123,7 @@ env_base.__class__.add_shared_library = methods.add_shared_library
 env_base.__class__.add_library = methods.add_library
 env_base.__class__.add_program = methods.add_program
 env_base.__class__.CommandNoCache = methods.CommandNoCache
+env_base.__class__.disable_warnings = methods.disable_warnings
 
 env_base["x86_libtheora_opt_gcc"] = False
 env_base["x86_libtheora_opt_vc"] = False
@@ -190,6 +191,7 @@ opts.Add(BoolVariable('builtin_pcre2', "Use the built-in PCRE2 library)", True))
 opts.Add(BoolVariable('builtin_recast', "Use the built-in Recast library", True))
 opts.Add(BoolVariable('builtin_squish', "Use the built-in squish library", True))
 opts.Add(BoolVariable('builtin_thekla_atlas', "Use the built-in thekla_altas library", True))
+opts.Add(BoolVariable('builtin_xatlas', "Use the built-in xatlas library", True))
 opts.Add(BoolVariable('builtin_zlib', "Use the built-in zlib library", True))
 opts.Add(BoolVariable('builtin_zstd', "Use the built-in Zstd library", True))
 
@@ -333,12 +335,13 @@ if selected_platform in platform_list:
         # Set exception handling model to avoid warnings caused by Windows system headers.
         env.Append(CCFLAGS=['/EHsc'])
     else: # Rest of the world
+        disable_nonessential_warnings = ['-Wno-sign-compare']
         if (env["warnings"] == 'extra'):
             env.Append(CCFLAGS=['-Wall', '-Wextra'])
         elif (env["warnings"] == 'all' or env["warnings"] == 'yes'):
-            env.Append(CCFLAGS=['-Wall'])
+            env.Append(CCFLAGS=['-Wall'] + disable_nonessential_warnings)
         elif (env["warnings"] == 'moderate'):
-            env.Append(CCFLAGS=['-Wall', '-Wno-unused'])
+            env.Append(CCFLAGS=['-Wall', '-Wno-unused'] + disable_nonessential_warnings)
         else: # 'no'
             env.Append(CCFLAGS=['-w'])
         env.Append(CCFLAGS=['-Werror=return-type'])

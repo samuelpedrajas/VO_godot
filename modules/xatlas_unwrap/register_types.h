@@ -1,5 +1,5 @@
 /*************************************************************************/
-/*  value_evaluator.h                                                    */
+/*  register_types.h                                                     */
 /*************************************************************************/
 /*                       This file is part of:                           */
 /*                           GODOT ENGINE                                */
@@ -28,19 +28,5 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
-#ifndef VALUE_EVALUATOR_H
-#define VALUE_EVALUATOR_H
-
-#include "core/object.h"
-
-class ValueEvaluator : public Object {
-
-	GDCLASS(ValueEvaluator, Object);
-
-public:
-	virtual double eval(const String &p_text) {
-		return p_text.to_double();
-	}
-};
-
-#endif // VALUE_EVALUATOR_H
+void register_xatlas_unwrap_types();
+void unregister_xatlas_unwrap_types();

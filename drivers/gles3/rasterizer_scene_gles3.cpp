@@ -1282,6 +1282,8 @@ bool RasterizerSceneGLES3::_setup_material(RasterizerStorageGLES3::Material *p_m
 				case ShaderLanguage::TYPE_SAMPLER2DARRAY: {
 					// TODO
 				} break;
+
+				default: {}
 			}
 		}
 
@@ -1509,6 +1511,7 @@ void RasterizerSceneGLES3::_setup_geometry(RenderList::Element *e, const Transfo
 			}
 
 		} break;
+		default: {}
 	}
 }
 
@@ -1557,8 +1560,11 @@ void RasterizerSceneGLES3::_render_geometry(RenderList::Element *e) {
 			RasterizerStorageGLES3::MultiMesh *multi_mesh = static_cast<RasterizerStorageGLES3::MultiMesh *>(e->owner);
 			RasterizerStorageGLES3::Surface *s = static_cast<RasterizerStorageGLES3::Surface *>(e->geometry);
 
-			int amount = MAX(multi_mesh->size, multi_mesh->visible_instances);
+			int amount = MIN(multi_mesh->size, multi_mesh->visible_instances);
 
+			if (amount == -1) {
+				amount = multi_mesh->size;
+			}
 #ifdef DEBUG_ENABLED
 
 			if (state.debug_draw == VS::VIEWPORT_DEBUG_DRAW_WIREFRAME && s->array_wireframe_id) {
@@ -1827,6 +1833,7 @@ void RasterizerSceneGLES3::_render_geometry(RenderList::Element *e) {
 			}
 
 		} break;
+		default: {}
 	}
 }
 
@@ -2364,14 +2371,15 @@ void RasterizerSceneGLES3::_add_geometry_with_material(RasterizerStorageGLES3::G
 	e->sort_key |= uint64_t(e->geometry->index) << RenderList::SORT_KEY_GEOMETRY_INDEX_SHIFT;
 	e->sort_key |= uint64_t(e->instance->base_type) << RenderList::SORT_KEY_GEOMETRY_TYPE_SHIFT;
 
+	if (e->material->last_pass != render_pass) {
+		e->material->last_pass = render_pass;
+		e->material->index = current_material_index++;
+	}
+
+	e->sort_key |= uint64_t(e->material->index) << RenderList::SORT_KEY_MATERIAL_INDEX_SHIFT;
+	e->sort_key |= uint64_t(e->instance->depth_layer) << RenderList::SORT_KEY_OPAQUE_DEPTH_LAYER_SHIFT;
+
 	if (!p_depth_pass) {
-
-		if (e->material->last_pass != render_pass) {
-			e->material->last_pass = render_pass;
-			e->material->index = current_material_index++;
-		}
-
-		e->sort_key |= uint64_t(e->material->index) << RenderList::SORT_KEY_MATERIAL_INDEX_SHIFT;
 
 		if (e->instance->gi_probe_instances.size()) {
 			e->sort_key |= SORT_KEY_GI_PROBES_FLAG;
@@ -2386,9 +2394,6 @@ void RasterizerSceneGLES3::_add_geometry_with_material(RasterizerStorageGLES3::G
 		}
 
 		e->sort_key |= uint64_t(p_material->render_priority + 128) << RenderList::SORT_KEY_PRIORITY_SHIFT;
-	} else {
-		e->sort_key |= uint64_t(e->instance->depth_layer) << RenderList::SORT_KEY_OPAQUE_DEPTH_LAYER_SHIFT;
-		e->sort_key |= uint64_t(e->material->index) << RenderList::SORT_KEY_MATERIAL_INDEX_SHIFT;
 	}
 
 	/*
@@ -2738,7 +2743,7 @@ void RasterizerSceneGLES3::_setup_directional_light(int p_index, const Transform
 
 			ubo_data.shadow_split_offsets[j] = li->shadow_transform[j].split;
 
-			Transform modelview = (p_camera_inverse_transform * li->shadow_transform[j].transform).inverse();
+			Transform modelview = (p_camera_inverse_transform * li->shadow_transform[j].transform).affine_inverse();
 
 			CameraMatrix bias;
 			bias.set_light_bias();
@@ -3035,13 +3040,14 @@ void RasterizerSceneGLES3::_setup_reflections(RID *p_reflection_probe_cull_resul
 			reflection_ubo.ambient[3] = rpi->probe_ptr->interior_ambient_probe_contrib;
 		} else {
 			Color ambient_linear;
-			float contrib = 0;
+			// FIXME: contrib was retrieved but never used, is it meant to be set as ambient[3]? (GH-20361)
+			//float contrib = 0;
 			if (p_env) {
 				ambient_linear = p_env->ambient_color.to_linear();
 				ambient_linear.r *= p_env->ambient_energy;
 				ambient_linear.g *= p_env->ambient_energy;
 				ambient_linear.b *= p_env->ambient_energy;
-				contrib = p_env->ambient_sky_contribution;
+				//contrib = p_env->ambient_sky_contribution;
 			}
 
 			reflection_ubo.ambient[0] = ambient_linear.r;
@@ -3131,7 +3137,6 @@ void RasterizerSceneGLES3::_fill_render_list(InstanceBase **p_cull_result, int p
 	current_material_index = 0;
 	state.used_sss = false;
 	state.used_screen_texture = false;
-
 	//fill list
 
 	for (int i = 0; i < p_cull_count; i++) {
@@ -3209,6 +3214,7 @@ void RasterizerSceneGLES3::_fill_render_list(InstanceBase **p_cull_result, int p
 				}
 
 			} break;
+			default: {}
 		}
 	}
 }
@@ -4295,7 +4301,6 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 	if (env) {
 		switch (env->bg_mode) {
 			case VS::ENV_BG_COLOR_SKY:
-
 			case VS::ENV_BG_SKY:
 
 				sky = storage->sky_owner.getornull(env->sky);
@@ -4333,6 +4338,7 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 				glEnable(GL_DEPTH_TEST);
 				glEnable(GL_CULL_FACE);
 				break;
+			default: {}
 		}
 	}
 
@@ -4501,7 +4507,7 @@ void RasterizerSceneGLES3::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 	RasterizerStorageGLES3::Light *light = storage->light_owner.getornull(light_instance->light);
 	ERR_FAIL_COND(!light);
 
-	uint32_t x, y, width, height, vp_height;
+	uint32_t x, y, width, height;
 
 	float dp_direction = 0.0;
 	float zfar = 0;
@@ -4583,7 +4589,6 @@ void RasterizerSceneGLES3::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 		bias = light->param[VS::LIGHT_PARAM_SHADOW_BIAS] * bias_mult;
 		normal_bias = light->param[VS::LIGHT_PARAM_SHADOW_NORMAL_BIAS] * bias_mult;
 		fbo = directional_shadow.fbo;
-		vp_height = directional_shadow.size;
 
 	} else {
 		//set from shadow atlas
@@ -4593,7 +4598,6 @@ void RasterizerSceneGLES3::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 		ERR_FAIL_COND(!shadow_atlas->shadow_owners.has(p_light));
 
 		fbo = shadow_atlas->fbo;
-		vp_height = shadow_atlas->size;
 
 		uint32_t key = shadow_atlas->shadow_owners[p_light];
 
@@ -5147,13 +5151,13 @@ void RasterizerSceneGLES3::initialize() {
 
 void RasterizerSceneGLES3::iteration() {
 
-	shadow_filter_mode = ShadowFilterMode(int(ProjectSettings::get_singleton()->get("rendering/quality/shadows/filter_mode")));
-	subsurface_scatter_follow_surface = ProjectSettings::get_singleton()->get("rendering/quality/subsurface_scattering/follow_surface");
-	subsurface_scatter_weight_samples = ProjectSettings::get_singleton()->get("rendering/quality/subsurface_scattering/weight_samples");
-	subsurface_scatter_quality = SubSurfaceScatterQuality(int(ProjectSettings::get_singleton()->get("rendering/quality/subsurface_scattering/quality")));
-	subsurface_scatter_size = ProjectSettings::get_singleton()->get("rendering/quality/subsurface_scattering/scale");
+	shadow_filter_mode = ShadowFilterMode(int(GLOBAL_GET("rendering/quality/shadows/filter_mode")));
+	subsurface_scatter_follow_surface = GLOBAL_GET("rendering/quality/subsurface_scattering/follow_surface");
+	subsurface_scatter_weight_samples = GLOBAL_GET("rendering/quality/subsurface_scattering/weight_samples");
+	subsurface_scatter_quality = SubSurfaceScatterQuality(int(GLOBAL_GET("rendering/quality/subsurface_scattering/quality")));
+	subsurface_scatter_size = GLOBAL_GET("rendering/quality/subsurface_scattering/scale");
 
-	state.scene_shader.set_conditional(SceneShaderGLES3::VCT_QUALITY_HIGH, ProjectSettings::get_singleton()->get("rendering/quality/voxel_cone_tracing/high_quality"));
+	state.scene_shader.set_conditional(SceneShaderGLES3::VCT_QUALITY_HIGH, GLOBAL_GET("rendering/quality/voxel_cone_tracing/high_quality"));
 }
 
 void RasterizerSceneGLES3::finalize() {

@@ -485,6 +485,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 	_initial_set("editors/2d/bone_outline_color", Color(0.35, 0.35, 0.35));
 	_initial_set("editors/2d/bone_outline_size", 2);
 	_initial_set("editors/2d/keep_margins_when_changing_anchors", false);
+	_initial_set("editors/2d/viewport_border_color", Color(0.4, 0.4, 1.0, 0.4));
 	_initial_set("editors/2d/warped_mouse_panning", true);
 	_initial_set("editors/2d/simple_spacebar_panning", false);
 	_initial_set("editors/2d/scroll_to_pan", false);
@@ -1216,18 +1217,25 @@ bool EditorSettings::is_dark_theme() {
 
 void EditorSettings::list_text_editor_themes() {
 	String themes = "Adaptive,Default,Custom";
+
 	DirAccess *d = DirAccess::open(get_text_editor_themes_dir());
 	if (d) {
+		List<String> custom_themes;
 		d->list_dir_begin();
 		String file = d->get_next();
 		while (file != String()) {
 			if (file.get_extension() == "tet" && file.get_basename().to_lower() != "default" && file.get_basename().to_lower() != "adaptive" && file.get_basename().to_lower() != "custom") {
-				themes += "," + file.get_basename();
+				custom_themes.push_back(file.get_basename());
 			}
 			file = d->get_next();
 		}
 		d->list_dir_end();
 		memdelete(d);
+
+		custom_themes.sort();
+		for (List<String>::Element *E = custom_themes.front(); E; E = E->next()) {
+			themes += "," + E->get();
+		}
 	}
 	add_property_hint(PropertyInfo(Variant::STRING, "text_editor/theme/color_theme", PROPERTY_HINT_ENUM, themes));
 }

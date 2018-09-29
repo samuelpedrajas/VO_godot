@@ -33,12 +33,9 @@
 #include "core/engine.h"
 #include "core/global_constants.h"
 #include "core/os/file_access.h"
-#include "editor/editor_settings.h"
 #include "gdscript_compiler.h"
 
 #ifdef TOOLS_ENABLED
-#include "core/engine.h"
-#include "core/reference.h"
 #include "editor/editor_file_system.h"
 #include "editor/editor_settings.h"
 #endif
@@ -1113,6 +1110,7 @@ static bool _guess_expression_type(const GDScriptCompletionContext &p_context, c
 				} break;
 			}
 		} break;
+		default: {}
 	}
 
 	// It may have found a null, but that's never useful
@@ -3357,6 +3355,7 @@ Error GDScriptLanguage::lookup_code(const String &p_code, const String &p_symbol
 				return OK;
 			}
 		} break;
+		default: {}
 	}
 
 	return ERR_CANT_RESOLVE;

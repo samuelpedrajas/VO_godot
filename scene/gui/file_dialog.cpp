@@ -330,6 +330,10 @@ void FileDialog::deselect_items() {
 			case MODE_OPEN_DIR:
 				get_ok()->set_text(RTR("Select Current Folder"));
 				break;
+			case MODE_OPEN_ANY:
+			case MODE_SAVE_FILE:
+				// FIXME: Implement, or refactor to avoid duplication with set_mode
+				break;
 		}
 	}
 }
@@ -349,7 +353,7 @@ void FileDialog::_tree_selected() {
 
 		file->set_text(d["name"]);
 	} else if (mode == MODE_OPEN_DIR) {
-		get_ok()->set_text(RTR("Select this Folder"));
+		get_ok()->set_text(RTR("Select This Folder"));
 	}
 
 	get_ok()->set_disabled(_is_open_should_be_disabled());
