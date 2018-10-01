@@ -157,10 +157,13 @@
 		</method>
 	</methods>
 	<members>
-		<member name="application/boot_splash/scale" type="String" setter="" getter="">
-			Scale the boot splash image using the selected mode (will leave it as default pixel size if disabled).
-		</member>
 		<member name="application/boot_splash/bg_color" type="Color" setter="" getter="">
+		</member>
+		<member name="application/boot_splash/fullsize" type="bool" setter="" getter="">
+			Scale the boot splash image according to the mode selected in the stretch_mode property (will leave it as default pixel size otherwise).
+		</member>
+		<member name="application/boot_splash/stretch_mode" type="String" setter="" getter="">
+			Specifies how the splash image will be stretched. Possible values: keep, keep_width, keep_height, cover and expand. Takes no effect if fullsize is false.
 		</member>
 		<member name="application/boot_splash/image" type="String" setter="" getter="">
 			Path to an image used for boot splash.

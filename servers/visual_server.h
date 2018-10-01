@@ -1021,7 +1021,16 @@ public:
 	virtual void mesh_add_surface_from_mesh_data(RID p_mesh, const Geometry::MeshData &p_mesh_data);
 	virtual void mesh_add_surface_from_planes(RID p_mesh, const PoolVector<Plane> &p_planes);
 
-	virtual void set_boot_image(const Ref<Image> &p_image, const Color &p_color, const String &p_scale) = 0;
+	enum SplashStretchMode {
+		SPLASH_STRETCH_MODE_KEEP,
+		SPLASH_STRETCH_MODE_KEEP_WIDTH,
+		SPLASH_STRETCH_MODE_KEEP_HEIGHT,
+		SPLASH_STRETCH_MODE_COVER,
+		SPLASH_STRETCH_MODE_EXPAND,
+		SPLASH_STRETCH_MODE_DISABLED,
+	};
+
+	virtual void set_boot_image(const Ref<Image> &p_image, const Color &p_color, SplashStretchMode p_stretch_mode) = 0;
 	virtual void set_default_clear_color(const Color &p_color) = 0;
 
 	enum Features {
@@ -1085,6 +1094,7 @@ VARIANT_ENUM_CAST(VisualServer::EnvironmentSSAOBlur);
 VARIANT_ENUM_CAST(VisualServer::InstanceFlags);
 VARIANT_ENUM_CAST(VisualServer::ShadowCastingSetting);
 VARIANT_ENUM_CAST(VisualServer::TextureType);
+VARIANT_ENUM_CAST(VisualServer::SplashStretchMode)
 
 //typedef VisualServer VS; // makes it easier to use
 #define VS VisualServer

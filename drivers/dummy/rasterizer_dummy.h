@@ -780,7 +780,7 @@ public:
 	RasterizerCanvas *get_canvas() { return &canvas; }
 	RasterizerScene *get_scene() { return &scene; }
 
-	void set_boot_image(const Ref<Image> &p_image, const Color &p_color, const String &p_scale) {}
+	void set_boot_image(const Ref<Image> &p_image, const Color &p_color, VisualServer::SplashStretchMode p_stretch_mode) {}
 
 	void initialize() {}
 	void begin_frame(double frame_step) {}

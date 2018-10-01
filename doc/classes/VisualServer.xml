@@ -3117,10 +3117,10 @@
 			</argument>
 			<argument index="1" name="color" type="Color">
 			</argument>
-			<argument index="2" name="scale" type="bool">
+			<argument index="2" name="stretch_mode" type="int">
 			</argument>
 			<description>
-				Sets a boot image. The color defines the background color and if scale is [code]true[/code] the image will be scaled to fit the screen size.
+				Sets a boot image. The color defines the background color. For more information about stretch modes see SPLASH_STRETCH_MODE* constants.
 			</description>
 		</method>
 		<method name="set_debug_generate_wireframes">
@@ -4399,6 +4399,24 @@
 		<constant name="ENV_SSAO_BLUR_2x2" value="2" enum="EnvironmentSSAOBlur">
 		</constant>
 		<constant name="ENV_SSAO_BLUR_3x3" value="3" enum="EnvironmentSSAOBlur">
+		</constant>
+		<constant name="SPLASH_STRETCH_MODE_KEEP" value="0" enum="SplashStretchMode">
+			If the window width is greater than its height, the splash image will be stretched to have the same height as the window. Otherwise, the image will be stretched to have the same width as the window. Both cases keep the original image's aspect ratio.
+		</constant>
+		<constant name="SPLASH_STRETCH_MODE_KEEP_WIDTH" value="1" enum="SplashStretchMode">
+			The splash image is stretched to have the same width as the window. It keeps the image's aspect ratio.
+		</constant>
+		<constant name="SPLASH_STRETCH_MODE_KEEP_HEIGHT" value="2" enum="SplashStretchMode">
+			The splash image is stretched to have the same height as the window. It keeps the image's aspect ratio.
+		</constant>
+		<constant name="SPLASH_STRETCH_MODE_COVER" value="3" enum="SplashStretchMode">
+			The splash image covers the window while keeping the aspect ratio.
+		</constant>
+		<constant name="SPLASH_STRETCH_MODE_EXPAND" value="4" enum="SplashStretchMode">
+			The splash image covers the window witohut keeping the aspect ratio.
+		</constant>
+		<constant name="SPLASH_STRETCH_MODE_DISABLED" value="5" enum="SplashStretchMode">
+			The splash image uses its default pixel size.
 		</constant>
 	</constants>
 </class>
