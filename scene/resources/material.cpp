@@ -427,10 +427,8 @@ void SpatialMaterial::_update_shader() {
 	if (flags[FLAG_USE_VERTEX_LIGHTING]) {
 		code += ",vertex_lighting";
 	}
-	bool using_world = false;
 	if (flags[FLAG_TRIPLANAR_USE_WORLD] && (flags[FLAG_UV1_USE_TRIPLANAR] || flags[FLAG_UV2_USE_TRIPLANAR])) {
 		code += ",world_vertex_coords";
-		using_world = true;
 	}
 	if (flags[FLAG_DONT_RECEIVE_SHADOWS]) {
 		code += ",shadows_disabled";
@@ -612,11 +610,11 @@ void SpatialMaterial::_update_shader() {
 			code += "\tMODELVIEW_MATRIX = INV_CAMERA_MATRIX * mat_world;\n";
 
 			//handle animation
-			code += "\tint particle_total_frames = particles_anim_h_frames * particles_anim_v_frames;\n";
-			code += "\tint particle_frame = int(INSTANCE_CUSTOM.z * float(particle_total_frames));\n";
-			code += "\tif (particles_anim_loop) particle_frame=clamp(particle_frame,0,particle_total_frames-1); else particle_frame=abs(particle_frame)%particle_total_frames;\n";
+			code += "\tfloat particle_total_frames = float(particles_anim_h_frames * particles_anim_v_frames);\n";
+			code += "\tfloat particle_frame = floor(INSTANCE_CUSTOM.z * float(particle_total_frames));\n";
+			code += "\tif (particles_anim_loop) particle_frame=clamp(particle_frame,0.0,particle_total_frames-1.0); else particle_frame=mod(particle_frame,float(particle_total_frames));\n";
 			code += "\tUV /= vec2(float(particles_anim_h_frames),float(particles_anim_v_frames));\n";
-			code += "\tUV += vec2(float(particle_frame % particles_anim_h_frames) / float(particles_anim_h_frames),float(particle_frame / particles_anim_h_frames) / float(particles_anim_v_frames));\n";
+			code += "\tUV += vec2(mod(particle_frame,float(particles_anim_h_frames)) / float(particles_anim_h_frames),particle_frame / float(particles_anim_h_frames) / float(particles_anim_v_frames));\n";
 		} break;
 	}
 
@@ -1371,6 +1369,12 @@ void SpatialMaterial::_validate_feature(const String &text, Feature feature, Pro
 	}
 }
 
+void SpatialMaterial::_validate_high_end(const String &text, PropertyInfo &property) const {
+	if (property.name.begins_with(text)) {
+		property.usage |= PROPERTY_USAGE_HIGH_END_GFX;
+	}
+}
+
 void SpatialMaterial::_validate_property(PropertyInfo &property) const {
 	_validate_feature("normal", FEATURE_NORMAL_MAPPING, property);
 	_validate_feature("emission", FEATURE_EMISSION, property);
@@ -1383,6 +1387,12 @@ void SpatialMaterial::_validate_property(PropertyInfo &property) const {
 	_validate_feature("transmission", FEATURE_TRANSMISSION, property);
 	_validate_feature("refraction", FEATURE_REFRACTION, property);
 	_validate_feature("detail", FEATURE_DETAIL, property);
+
+	_validate_high_end("refraction", property);
+	_validate_high_end("subsurf_scatter", property);
+	_validate_high_end("anisotropy", property);
+	_validate_high_end("clearcoat", property);
+	_validate_high_end("depth", property);
 
 	if (property.name.begins_with("particles_anim_") && billboard_mode != BILLBOARD_PARTICLES) {
 		property.usage = 0;

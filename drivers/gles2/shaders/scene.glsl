@@ -27,15 +27,15 @@ attribute vec3 normal_attrib; // attrib:1
 attribute vec4 tangent_attrib; // attrib:2
 #endif
 
-#ifdef ENABLE_COLOR_INTERP
+#if defined(ENABLE_COLOR_INTERP)
 attribute vec4 color_attrib; // attrib:3
 #endif
 
-#ifdef ENABLE_UV_INTERP
+#if defined(ENABLE_UV_INTERP)
 attribute vec2 uv_attrib; // attrib:4
 #endif
 
-#ifdef ENABLE_UV2_INTERP
+#if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
 attribute vec2 uv2_attrib; // attrib:5
 #endif
 
@@ -43,9 +43,9 @@ attribute vec2 uv2_attrib; // attrib:5
 
 #ifdef USE_SKELETON_SOFTWARE
 
-attribute highp vec4 bone_transform_row_0; // attrib:8
-attribute highp vec4 bone_transform_row_1; // attrib:9
-attribute highp vec4 bone_transform_row_2; // attrib:10
+attribute highp vec4 bone_transform_row_0; // attrib:13
+attribute highp vec4 bone_transform_row_1; // attrib:14
+attribute highp vec4 bone_transform_row_2; // attrib:15
 
 #else
 
@@ -102,15 +102,15 @@ varying vec3 tangent_interp;
 varying vec3 binormal_interp;
 #endif
 
-#ifdef ENABLE_COLOR_INTERP
+#if defined(ENABLE_COLOR_INTERP)
 varying vec4 color_interp;
 #endif
 
-#ifdef ENABLE_UV_INTERP
+#if defined(ENABLE_UV_INTERP)
 varying vec2 uv_interp;
 #endif
 
-#ifdef ENABLE_UV2_INTERP
+#if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
 varying vec2 uv2_interp;
 #endif
 
@@ -129,11 +129,6 @@ uniform highp float shadow_dual_paraboloid_render_side;
 #endif
 
 #if defined(USE_SHADOW) && defined(USE_LIGHTING)
-
-#ifdef LIGHT_MODE_DIRECTIONAL
-uniform highp sampler2D light_directional_shadow; // texunit:-3
-uniform highp vec4 light_split_offsets;
-#endif
 
 uniform highp mat4 light_shadow_matrix;
 varying highp vec4 shadow_coord;
@@ -262,6 +257,35 @@ void light_compute(
 
 #endif
 
+#ifdef USE_VERTEX_LIGHTING
+
+#ifdef USE_REFLECTION_PROBE1
+
+uniform mat4 refprobe1_local_matrix;
+varying mediump vec4 refprobe1_reflection_normal_blend;
+uniform vec3 refprobe1_box_extents;
+
+#ifndef USE_LIGHTMAP
+varying mediump vec3 refprobe1_ambient_normal;
+#endif
+
+#endif //reflection probe1
+
+#ifdef USE_REFLECTION_PROBE2
+
+uniform mat4 refprobe2_local_matrix;
+varying mediump vec4 refprobe2_reflection_normal_blend;
+uniform vec3 refprobe2_box_extents;
+
+#ifndef USE_LIGHTMAP
+varying mediump vec3 refprobe2_ambient_normal;
+#endif
+
+#endif //reflection probe2
+
+#endif //vertex lighting for refprobes
+
+
 void main() {
 
 	highp vec4 vertex = vertex_attrib;
@@ -277,6 +301,7 @@ void main() {
 				vec4(0.0, 0.0, 0.0, 1.0));
 		world_matrix = world_matrix * transpose(m);
 	}
+
 #endif
 
 	vec3 normal = normal_attrib * normal_mult;
@@ -288,18 +313,18 @@ void main() {
 	vec3 binormal = normalize(cross(normal, tangent) * binormalf);
 #endif
 
-#ifdef ENABLE_COLOR_INTERP
+#if defined(ENABLE_COLOR_INTERP)
 	color_interp = color_attrib;
 #ifdef USE_INSTANCING
 	color_interp *= instance_color;
 #endif
 #endif
 
-#ifdef ENABLE_UV_INTERP
+#if defined(ENABLE_UV_INTERP)
 	uv_interp = uv_attrib;
 #endif
 
-#ifdef ENABLE_UV2_INTERP
+#if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
 	uv2_interp = uv2_attrib;
 #endif
 
@@ -492,12 +517,58 @@ VERTEX_SHADER_CODE
 
 #if defined(LIGHT_USE_PSSM4)
 	shadow_coord3 = light_shadow_matrix3 * vi4;
-	shadow_coord3 = light_shadow_matrix3 * vi4;
+	shadow_coord4 = light_shadow_matrix4 * vi4;
 
 #endif
 
 #endif //use shadow and use lighting
 
+#ifdef USE_VERTEX_LIGHTING
+
+#ifdef USE_REFLECTION_PROBE1
+	{
+		vec3 ref_normal = normalize(reflect(vertex_interp, normal_interp));
+		vec3 local_pos = (refprobe1_local_matrix * vec4(vertex_interp, 1.0)).xyz;		
+		vec3 inner_pos = abs(local_pos / refprobe1_box_extents);
+		float blend = max(inner_pos.x, max(inner_pos.y, inner_pos.z));
+
+		{
+			vec3 local_ref_vec = (refprobe1_local_matrix * vec4(ref_normal, 0.0)).xyz;
+			refprobe1_reflection_normal_blend.xyz = local_ref_vec;
+			refprobe1_reflection_normal_blend.a = blend;
+
+		}
+#ifndef USE_LIGHTMAP
+
+		refprobe1_ambient_normal = (refprobe1_local_matrix * vec4(normal_interp, 0.0)).xyz;
+#endif
+	}
+
+#endif //USE_REFLECTION_PROBE1
+
+
+#ifdef USE_REFLECTION_PROBE2
+	{
+		vec3 ref_normal = normalize(reflect(vertex_interp, normal_interp));
+		vec3 local_pos = (refprobe2_local_matrix * vec4(vertex_interp, 1.0)).xyz;
+		vec3 inner_pos = abs(local_pos / refprobe2_box_extents);
+		float blend = max(inner_pos.x, max(inner_pos.y, inner_pos.z));
+
+		{
+			vec3 local_ref_vec = (refprobe2_local_matrix * vec4(ref_normal, 0.0)).xyz;
+			refprobe2_reflection_normal_blend.xyz = local_ref_vec;
+			refprobe2_reflection_normal_blend.a = blend;
+
+		}
+#ifndef USE_LIGHTMAP
+
+		refprobe2_ambient_normal = (refprobe2_local_matrix * vec4(normal_interp, 0.0)).xyz;
+#endif
+	}
+
+#endif //USE_REFLECTION_PROBE2
+
+#endif //use vertex lighting
 	gl_Position = projection_matrix * vec4(vertex_interp, 1.0);
 }
 
@@ -537,7 +608,7 @@ uniform mat4 world_transform;
 
 uniform highp float time;
 
-#ifdef SCREEN_UV_USED
+#if defined(SCREEN_UV_USED)
 uniform vec2 screen_pixel_size;
 #endif
 
@@ -548,9 +619,169 @@ uniform vec2 screen_pixel_size;
 uniform highp sampler2D screen_texture; //texunit:-4
 #endif
 
-#ifdef USE_RADIANCE_MAP
+#ifdef USE_REFLECTION_PROBE1
+
+#ifdef USE_VERTEX_LIGHTING
+
+varying mediump vec4 refprobe1_reflection_normal_blend;
+#ifndef USE_LIGHTMAP
+varying mediump vec3 refprobe1_ambient_normal;
+#endif
+
+#else
+
+uniform bool refprobe1_use_box_project;
+uniform vec3 refprobe1_box_extents;
+uniform vec3 refprobe1_box_offset;
+uniform mat4 refprobe1_local_matrix;
+
+#endif //use vertex lighting
+
+uniform bool refprobe1_exterior;
+
+uniform highp samplerCube reflection_probe1; //texunit:-5
+
+uniform float refprobe1_intensity;
+uniform vec4 refprobe1_ambient;
+
+#endif //USE_REFLECTION_PROBE1
+
+#ifdef USE_REFLECTION_PROBE2
+
+#ifdef USE_VERTEX_LIGHTING
+
+varying mediump vec4 refprobe2_reflection_normal_blend;
+#ifndef USE_LIGHTMAP
+varying mediump vec3 refprobe2_ambient_normal;
+#endif
+
+#else
+
+uniform bool refprobe2_use_box_project;
+uniform vec3 refprobe2_box_extents;
+uniform vec3 refprobe2_box_offset;
+uniform mat4 refprobe2_local_matrix;
+
+#endif //use vertex lighting
+
+uniform bool refprobe2_exterior;
+
+uniform highp samplerCube reflection_probe2; //texunit:-6
+
+uniform float refprobe2_intensity;
+uniform vec4 refprobe2_ambient;
+
+#endif //USE_REFLECTION_PROBE2
 
 #define RADIANCE_MAX_LOD 6.0
+
+#if defined(USE_REFLECTION_PROBE1) || defined(USE_REFLECTION_PROBE2)
+
+void reflection_process(samplerCube reflection_map,
+#ifdef USE_VERTEX_LIGHTING
+			vec3 ref_normal,
+#ifndef USE_LIGHTMAP
+			vec3 amb_normal,
+#endif
+			float ref_blend,
+
+#else //no vertex lighting
+			vec3 normal, vec3 vertex,
+			mat4 local_matrix,
+			bool use_box_project, vec3 box_extents, vec3 box_offset,
+#endif //vertex lighting
+			bool exterior,float intensity, vec4 ref_ambient, float roughness, vec3 ambient, vec3 skybox, inout highp vec4 reflection_accum, inout highp vec4 ambient_accum) {
+
+	vec4 reflection;
+
+#ifdef USE_VERTEX_LIGHTING
+
+	reflection.rgb = textureCubeLod(reflection_map, ref_normal, roughness * RADIANCE_MAX_LOD).rgb;
+
+	float blend = ref_blend; //crappier blend formula for vertex
+	blend *= blend;
+	blend = max(0.0, 1.0 - blend);
+
+#else //fragment lighting
+
+	vec3 local_pos = (local_matrix * vec4(vertex, 1.0)).xyz;
+
+	if (any(greaterThan(abs(local_pos), box_extents))) { //out of the reflection box
+		return;
+	}
+
+	vec3 inner_pos = abs(local_pos / box_extents);
+	float blend = max(inner_pos.x, max(inner_pos.y, inner_pos.z));
+	blend = mix(length(inner_pos), blend, blend);
+	blend *= blend;
+	blend = max(0.0, 1.0 - blend);
+
+	//reflect and make local
+	vec3 ref_normal = normalize(reflect(vertex, normal));
+	ref_normal = (local_matrix * vec4(ref_normal, 0.0)).xyz;
+
+	if (use_box_project) { //box project
+
+		vec3 nrdir = normalize(ref_normal);
+		vec3 rbmax = (box_extents - local_pos) / nrdir;
+		vec3 rbmin = (-box_extents - local_pos) / nrdir;
+
+		vec3 rbminmax = mix(rbmin, rbmax, vec3(greaterThan(nrdir, vec3(0.0, 0.0, 0.0))));
+
+		float fa = min(min(rbminmax.x, rbminmax.y), rbminmax.z);
+		vec3 posonbox = local_pos + nrdir * fa;
+		ref_normal = posonbox - box_offset.xyz;
+	}
+
+	reflection.rgb = textureCubeLod(reflection_map, ref_normal, roughness * RADIANCE_MAX_LOD).rgb;
+#endif
+
+	if (exterior) {
+		reflection.rgb = mix(skybox, reflection.rgb, blend);
+	}
+	reflection.rgb *= intensity;
+	reflection.a = blend;
+	reflection.rgb *= blend;
+
+	reflection_accum += reflection;
+
+
+#ifndef USE_LIGHTMAP
+
+	vec4 ambient_out;
+#ifndef USE_VERTEX_LIGHTING
+
+	vec3 amb_normal = (local_matrix * vec4(normal, 0.0)).xyz;
+#endif
+
+	ambient_out.rgb = textureCubeLod(reflection_map, amb_normal, RADIANCE_MAX_LOD).rgb;
+	ambient_out.rgb = mix(ref_ambient.rgb, ambient_out.rgb, ref_ambient.a);
+	if (exterior) {
+		ambient_out.rgb = mix(ambient, ambient_out.rgb, blend);
+	}
+
+	ambient_out.a = blend;
+	ambient_out.rgb *= blend;
+	ambient_accum += ambient_out;
+
+#endif
+}
+
+#endif //use refprobe 1 or 2
+
+#ifdef USE_LIGHTMAP
+uniform mediump sampler2D lightmap; //texunit:-4
+uniform mediump float lightmap_energy;
+#endif
+
+#ifdef USE_LIGHTMAP_CAPTURE
+uniform mediump vec4[12] lightmap_captures;
+uniform bool lightmap_capture_sky;
+
+#endif
+
+#ifdef USE_RADIANCE_MAP
+
 
 uniform samplerCube radiance_map; // texunit:-2
 
@@ -640,15 +871,15 @@ varying vec3 tangent_interp;
 varying vec3 binormal_interp;
 #endif
 
-#ifdef ENABLE_COLOR_INTERP
+#if defined(ENABLE_COLOR_INTERP)
 varying vec4 color_interp;
 #endif
 
-#ifdef ENABLE_UV_INTERP
+#if defined(ENABLE_UV_INTERP)
 varying vec2 uv_interp;
 #endif
 
-#ifdef ENABLE_UV2_INTERP
+#if defined(ENABLE_UV2_INTERP) || defined(USE_LIGHTMAP)
 varying vec2 uv2_interp;
 #endif
 
@@ -659,6 +890,8 @@ vec3 metallic_to_specular_color(float metallic, float specular, vec3 albedo) {
 	// energy conservation
 	return mix(vec3(dielectric), albedo, metallic); // TODO: reference?
 }
+
+
 
 /* clang-format off */
 
@@ -1057,11 +1290,11 @@ void main() {
 #endif
 	float normaldepth = 1.0;
 
-#ifdef ALPHA_SCISSOR_USED
+#if defined(ALPHA_SCISSOR_USED)
 	float alpha_scissor = 0.5;
 #endif
 
-#ifdef SCREEN_UV_USED
+#if defined(SCREEN_UV_USED)
 	vec2 screen_uv = gl_FragCoord.xy * screen_pixel_size;
 #endif
 
@@ -1091,7 +1324,7 @@ FRAGMENT_SHADER_CODE
 
 	vec3 eye_position = -normalize(vertex_interp);
 
-#ifdef ALPHA_SCISSOR_USED
+#if defined(ALPHA_SCISSOR_USED)
 	if (alpha < alpha_scissor) {
 		discard;
 	}
@@ -1122,6 +1355,105 @@ FRAGMENT_SHADER_CODE
 #endif
 
 	ambient_light *= ambient_energy;
+
+	
+#if defined(USE_REFLECTION_PROBE1) || defined(USE_REFLECTION_PROBE2)
+
+	
+
+	vec4 ambient_accum = vec4(0.0);
+	vec4 reflection_accum = vec4(0.0);
+
+#ifdef USE_REFLECTION_PROBE1
+
+	reflection_process(reflection_probe1,
+#ifdef USE_VERTEX_LIGHTING
+			   refprobe1_reflection_normal_blend.rgb,
+#ifndef USE_LIGHTMAP		
+			   refprobe1_ambient_normal,
+#endif			   
+			   refprobe1_reflection_normal_blend.a,
+#else
+			   normal_interp,vertex_interp,refprobe1_local_matrix,
+			   refprobe1_use_box_project,refprobe1_box_extents,refprobe1_box_offset,
+#endif
+			   refprobe1_exterior,refprobe1_intensity, refprobe1_ambient, roughness,
+			   ambient_light, specular_light, reflection_accum, ambient_accum);
+
+
+
+#endif // USE_REFLECTION_PROBE1
+
+#ifdef USE_REFLECTION_PROBE2
+
+	reflection_process(reflection_probe2,
+#ifdef USE_VERTEX_LIGHTING
+			   refprobe2_reflection_normal_blend.rgb,
+#ifndef USE_LIGHTMAP
+			   refprobe2_ambient_normal,
+#endif
+			   refprobe2_reflection_normal_blend.a,
+#else
+			   normal_interp,vertex_interp,refprobe2_local_matrix,
+			   refprobe2_use_box_project,refprobe2_box_extents,refprobe2_box_offset,
+#endif
+			   refprobe2_exterior,refprobe2_intensity, refprobe2_ambient, roughness,
+			   ambient_light, specular_light, reflection_accum, ambient_accum);
+
+#endif // USE_REFLECTION_PROBE2
+
+	if (reflection_accum.a > 0.0) {
+		specular_light = reflection_accum.rgb / reflection_accum.a;
+	}
+
+#ifndef USE_LIGHTMAP
+	if (ambient_accum.a > 0.0) {
+		ambient_light = ambient_accum.rgb / ambient_accum.a;
+	}
+#endif
+
+#endif // defined(USE_REFLECTION_PROBE1) || defined(USE_REFLECTION_PROBE2)
+
+#ifdef USE_LIGHTMAP
+	//ambient light will come entirely from lightmap is lightmap is used
+	ambient_light = texture2D(lightmap, uv2_interp).rgb * lightmap_energy;
+#endif
+
+#ifdef USE_LIGHTMAP_CAPTURE
+	{
+		vec3 cone_dirs[12] = vec3[](
+				vec3(0, 0, 1),
+				vec3(0.866025, 0, 0.5),
+				vec3(0.267617, 0.823639, 0.5),
+				vec3(-0.700629, 0.509037, 0.5),
+				vec3(-0.700629, -0.509037, 0.5),
+				vec3(0.267617, -0.823639, 0.5),
+				vec3(0, 0, -1),
+				vec3(0.866025, 0, -0.5),
+				vec3(0.267617, 0.823639, -0.5),
+				vec3(-0.700629, 0.509037, -0.5),
+				vec3(-0.700629, -0.509037, -0.5),
+				vec3(0.267617, -0.823639, -0.5));
+
+		vec3 local_normal = normalize(camera_matrix * vec4(normal, 0.0)).xyz;
+		vec4 captured = vec4(0.0);
+		float sum = 0.0;
+		for (int i = 0; i < 12; i++) {
+			float amount = max(0.0, dot(local_normal, cone_dirs[i])); //not correct, but creates a nice wrap around effect
+			captured += lightmap_captures[i] * amount;
+			sum += amount;
+		}
+
+		captured /= sum;
+
+		if (lightmap_capture_sky) {
+			ambient_light = mix(ambient_light, captured.rgb, captured.a);
+		} else {
+			ambient_light = captured.rgb;
+		}
+	}
+#endif
+
 
 #endif //BASE PASS
 
