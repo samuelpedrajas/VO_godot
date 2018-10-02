@@ -1,6 +1,8 @@
 #include "godotAdmob.h"
 #import "app_delegate.h"
 
+#import <GoogleMobileAds/GADMobileAds.h>
+
 #if VERSION_MAJOR == 3
 #define CLASS_DB ClassDB
 #else
@@ -25,7 +27,9 @@ void GodotAdmob::init(bool isReal, int instanceId) {
     }
     
     initialized = true;
-    
+
+    [GADMobileAds configureWithApplicationID:@"ca-app-pub-1160358939410189~8221472002"];
+
     banner = [AdmobBanner alloc];
     [banner initialize :isReal :instanceId];
     

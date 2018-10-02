@@ -62,7 +62,7 @@ public class GodotAdMob extends Godot.SingletonBase
 		{
 			@Override public void run()
 			{
-				MobileAds.initialize(activity);
+				MobileAds.initialize(activity, "ca-app-pub-1160358939410189~9637939928");
 				rewardedVideoAd = MobileAds.getRewardedVideoAdInstance(activity);
 				rewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener()
 				{
