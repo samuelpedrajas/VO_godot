@@ -5,6 +5,8 @@ def can_build(env, plat):
 def configure(env):
 	if (env['platform'] == 'android'):
 		env.android_add_dependency("compile 'com.google.android.gms:play-services-ads:+'")
+		env.android_add_dependency("compile 'com.unity3d.ads:unity-ads:2.3.0'")
+		env.android_add_dependency("compile 'com.google.ads.mediation:unity:2.3.0.0'")
 		env.android_add_java_dir("android")
 		env.android_add_to_manifest("android/AndroidManifestChunk.xml")
 		env.disable_module()

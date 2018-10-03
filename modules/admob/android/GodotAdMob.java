@@ -23,6 +23,9 @@ import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 
+import com.unity3d.ads.metadata.MetaData;
+
+
 public class GodotAdMob extends Godot.SingletonBase
 {
 
@@ -50,6 +53,11 @@ public class GodotAdMob extends Godot.SingletonBase
 	{
 		this.isReal = isReal;
 		this.instance_id = instance_id;
+
+		MetaData gdprMetaData = new MetaData(activity);
+		gdprMetaData.set("gdpr.consent", true);
+		gdprMetaData.commit();
+
 		Log.d("godot", "AdMob: init");
 	}
 
@@ -63,6 +71,7 @@ public class GodotAdMob extends Godot.SingletonBase
 			@Override public void run()
 			{
 				MobileAds.initialize(activity, "ca-app-pub-1160358939410189~9637939928");
+
 				rewardedVideoAd = MobileAds.getRewardedVideoAdInstance(activity);
 				rewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener()
 				{
@@ -135,7 +144,13 @@ public class GodotAdMob extends Godot.SingletonBase
 				}
 
 				if (!rewardedVideoAd.isLoaded()) {
-					rewardedVideoAd.loadAd(id, new AdRequest.Builder().build());
+					AdRequest.Builder adBuilder = new AdRequest.Builder();
+					adBuilder.tagForChildDirectedTreatment(true);
+					if (!isReal) {
+						adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
+						adBuilder.addTestDevice(getAdmobDeviceId());
+					}
+					rewardedVideoAd.loadAd(id, adBuilder.build());
 				}
 			}
 		});
@@ -434,9 +449,8 @@ public class GodotAdMob extends Godot.SingletonBase
 	 */
 	private String getAdmobDeviceId()
 	{
-		String android_id = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.ANDROID_ID);
-		String deviceId = md5(android_id).toUpperCase(Locale.US);
-		return deviceId;
+		String android_id = "8C5F58A2AC458AD2867CD9B9A0EEE841";
+		return android_id;
 	}
 
 	/* Definitions
