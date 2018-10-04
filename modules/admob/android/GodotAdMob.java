@@ -449,8 +449,9 @@ public class GodotAdMob extends Godot.SingletonBase
 	 */
 	private String getAdmobDeviceId()
 	{
-		String android_id = "8C5F58A2AC458AD2867CD9B9A0EEE841";
-		return android_id;
+		String android_id = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.ANDROID_ID);
+		String deviceId = md5(android_id).toUpperCase(Locale.US);
+		return deviceId;
 	}
 
 	/* Definitions

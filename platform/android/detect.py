@@ -142,9 +142,12 @@ def configure(env):
         if (env["optimize"] == "speed"): #optimize for speed (default)
             env.Append(LINKFLAGS=['-O2'])
             env.Append(CPPFLAGS=['-O2', '-DNDEBUG', '-ffast-math', '-funsafe-math-optimizations', '-fomit-frame-pointer'])
-        else: #optimize for size
+        elif (env["optimize"] == "size"): #optimize for size
             env.Append(CPPFLAGS=['-Os', '-DNDEBUG'])
             env.Append(LINKFLAGS=['-Os'])
+        else:
+            env.Append(LINKFLAGS=['-Os']) #custom optimization
+            env.Append(CPPFLAGS=['-Os', '-DNDEBUG', '-ffast-math', '-funsafe-math-optimizations', '-fomit-frame-pointer'])
 
         if (can_vectorize):
             env.Append(CPPFLAGS=['-ftree-vectorize'])
