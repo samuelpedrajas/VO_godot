@@ -150,7 +150,15 @@ void TextureButton::_notification(int p_what) {
 					} else
 						texdraw = hover;
 				} break;
-				case DRAW_HOVER_PRESSED: break; // Not used in this class
+				case DRAW_HOVER_PRESSED: {
+					if (hover.is_null()) {
+						if (pressed.is_valid() && is_pressed())
+							texdraw = pressed;
+						else if (normal.is_valid())
+							texdraw = normal;
+					} else
+						texdraw = hover;
+				} break;
 				case DRAW_DISABLED: {
 
 					if (disabled.is_null()) {
