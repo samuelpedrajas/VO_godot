@@ -151,6 +151,7 @@ void TextureButton::_notification(int p_what) {
 						texdraw = hover;
 				} break;
 				case DRAW_HOVER_PRESSED: {
+
 					if (hover.is_null()) {
 						if (pressed.is_valid() && is_pressed())
 							texdraw = pressed;
