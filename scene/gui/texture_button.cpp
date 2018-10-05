@@ -128,6 +128,7 @@ void TextureButton::_notification(int p_what) {
 					if (normal.is_valid())
 						texdraw = normal;
 				} break;
+				case DRAW_HOVER_PRESSED:
 				case DRAW_PRESSED: {
 
 					if (pressed.is_null()) {
@@ -141,16 +142,6 @@ void TextureButton::_notification(int p_what) {
 						texdraw = pressed;
 				} break;
 				case DRAW_HOVER: {
-
-					if (hover.is_null()) {
-						if (pressed.is_valid() && is_pressed())
-							texdraw = pressed;
-						else if (normal.is_valid())
-							texdraw = normal;
-					} else
-						texdraw = hover;
-				} break;
-				case DRAW_HOVER_PRESSED: {
 
 					if (hover.is_null()) {
 						if (pressed.is_valid() && is_pressed())
