@@ -32,10 +32,10 @@ public class GodotAdMob extends Godot.SingletonBase
 	private Activity activity = null; // The main activity of the game
 	private int instance_id = 0;
 
-	private InterstitialAd interstitialAd = null; // Interstitial object
 	private AdView adView = null; // Banner view
 
 	private boolean isReal = false; // Store if is real or not
+	private boolean isLoading = false;
 
 	private FrameLayout layout = null; // Store the layout
 	private FrameLayout.LayoutParams adParams = null; // Store the layout params
@@ -76,12 +76,6 @@ public class GodotAdMob extends Godot.SingletonBase
 				rewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener()
 				{
 					@Override
-					public void onRewardedVideoAdLeftApplication() {
-						Log.w("godot", "AdMob: onRewardedVideoAdLeftApplication");
-						GodotLib.calldeferred(instance_id, "_on_rewarded_video_ad_left_application", new Object[] { });
-					}
-
-					@Override
 					public void onRewardedVideoAdClosed() {
 						Log.w("godot", "AdMob: onRewardedVideoAdClosed");
 						GodotLib.calldeferred(instance_id, "_on_rewarded_video_ad_closed", new Object[] { });
@@ -89,6 +83,7 @@ public class GodotAdMob extends Godot.SingletonBase
 
 					@Override
 					public void onRewardedVideoAdFailedToLoad(int errorCode) {
+						isLoading = false;
 						Log.w("godot", "AdMob: onRewardedVideoAdFailedToLoad. errorCode: " + errorCode);
 						GodotLib.calldeferred(instance_id, "_on_rewarded_video_ad_failed_to_load", new Object[] { errorCode });
 					}
@@ -100,28 +95,10 @@ public class GodotAdMob extends Godot.SingletonBase
 					}
 
 					@Override
-					public void onRewardedVideoAdOpened() {
-						Log.w("godot", "AdMob: onRewardedVideoAdOpened");
-						GodotLib.calldeferred(instance_id, "_on_rewarded_video_ad_opened", new Object[] { });
-					}
-
-					@Override
 					public void onRewarded(RewardItem reward) {
 						Log.w("godot", "AdMob: " + String.format(" onRewarded! currency: %s amount: %d", reward.getType(),
 								reward.getAmount()));
 						GodotLib.calldeferred(instance_id, "_on_rewarded", new Object[] { reward.getType(), reward.getAmount() });
-					}
-
-					@Override
-					public void onRewardedVideoStarted() {
-						Log.w("godot", "AdMob: onRewardedVideoStarted");
-						GodotLib.calldeferred(instance_id, "_on_rewarded_video_started", new Object[] { });
-					}
-
-					@Override
-					public void onRewardedVideoCompleted() {
-						Log.w("godot", "AdMob: onRewardedVideoCompleted");
-						GodotLib.calldeferred(instance_id, "_on_rewarded_video_completed", new Object[] { });
 					}
 				});
 
@@ -143,7 +120,8 @@ public class GodotAdMob extends Godot.SingletonBase
 					initRewardedVideo();
 				}
 
-				if (!rewardedVideoAd.isLoaded()) {
+				if (!rewardedVideoAd.isLoaded() && !isLoading) {
+					isLoading = true;
 					AdRequest.Builder adBuilder = new AdRequest.Builder();
 					adBuilder.tagForChildDirectedTreatment(true);
 					if (!isReal) {
@@ -165,6 +143,7 @@ public class GodotAdMob extends Godot.SingletonBase
 			@Override public void run()
 			{
 				if (rewardedVideoAd.isLoaded()) {
+					isLoading = false;
 					rewardedVideoAd.show();
 				}
 			}
@@ -343,75 +322,6 @@ public class GodotAdMob extends Godot.SingletonBase
 		return (int)(AdSize.SMART_BANNER.getHeightInPixels(activity));
 	}
 
-	/* Interstitial
-	 * ********************************************************************** */
-
-	/**
-	 * Load a interstitial
-	 * @param String id AdMod Interstitial ID
-	 */
-	public void loadInterstitial(final String id)
-	{
-		activity.runOnUiThread(new Runnable()
-		{
-			@Override public void run()
-			{
-				interstitialAd = new InterstitialAd(activity);
-				interstitialAd.setAdUnitId(id);
-		        interstitialAd.setAdListener(new AdListener()
-				{
-					@Override
-					public void onAdLoaded() {
-						Log.w("godot", "AdMob: onAdLoaded");
-						GodotLib.calldeferred(instance_id, "_on_interstitial_loaded", new Object[] { });
-					}
-
-					@Override
-					public void onAdClosed() {
-						GodotLib.calldeferred(instance_id, "_on_interstitial_close", new Object[] { });
-
-						AdRequest.Builder adBuilder = new AdRequest.Builder();
-						adBuilder.tagForChildDirectedTreatment(true);
-						if (!isReal) {
-							adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
-							adBuilder.addTestDevice(getAdmobDeviceId());
-						}
-						interstitialAd.loadAd(adBuilder.build());
-
-						Log.w("godot", "AdMob: onAdClosed");
-					}
-				});
-
-				AdRequest.Builder adBuilder = new AdRequest.Builder();
-				adBuilder.tagForChildDirectedTreatment(true);
-				if (!isReal) {
-					adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
-					adBuilder.addTestDevice(getAdmobDeviceId());
-				}
-
-				interstitialAd.loadAd(adBuilder.build());
-			}
-		});
-	}
-
-	/**
-	 * Show the interstitial
-	 */
-	public void showInterstitial()
-	{
-		activity.runOnUiThread(new Runnable()
-		{
-			@Override public void run()
-			{
-				if (interstitialAd.isLoaded()) {
-					interstitialAd.show();
-				} else {
-					Log.w("godot", "AdMob: _on_interstitial_not_loaded");
-					GodotLib.calldeferred(instance_id, "_on_interstitial_not_loaded", new Object[] { });
-				}
-			}
-		});
-	}
 
 	/* Utils
 	 * ********************************************************************** */
@@ -474,7 +384,7 @@ public class GodotAdMob extends Godot.SingletonBase
 		registerClass("AdMob", new String[] {
 			"init",
 			"loadBanner", "showBanner", "hideBanner", "getBannerWidth", "getBannerHeight", "resize",
-			"loadInterstitial", "showInterstitial", "loadRewardedVideo", "showRewardedVideo"
+			"loadRewardedVideo", "showRewardedVideo"
 		});
 		activity = p_activity;
 	}
