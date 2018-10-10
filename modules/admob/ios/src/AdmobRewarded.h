@@ -1,11 +1,14 @@
 #import "app_delegate.h"
+#include "core/reference.h"
 #import <GoogleMobileAds/GADRewardBasedVideoAdDelegate.h>
 
 
 @interface AdmobRewarded: UIViewController <GADRewardBasedVideoAdDelegate> {
+	bool isLoading;
     bool initialized;
     bool isReal;
     int instanceId;
+    Object *obj;
     ViewController *rootController;
 }
 

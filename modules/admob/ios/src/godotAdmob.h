@@ -9,13 +9,10 @@
 #ifdef __OBJC__
 @class AdmobBanner;
 typedef AdmobBanner *bannerPtr;
-@class AdmobInterstitial;
-typedef AdmobInterstitial *interstitialPtr;
 @class AdmobRewarded;
 typedef AdmobRewarded *rewardedPtr;
 #else
 typedef void *bannerPtr;
-typedef void *interstitialPtr;
 typedef void *rewardedPtr;
 #endif
 
@@ -33,7 +30,6 @@ class GodotAdmob : public Reference {
     GodotAdmob *instance;
     
     bannerPtr banner;
-    interstitialPtr interstitial;
     rewardedPtr rewarded;
     
 
@@ -49,8 +45,6 @@ public:
     void resize();
     int getBannerWidth();
     int getBannerHeight();
-    void loadInterstitial(const String &interstitialId);
-    void showInterstitial();
     void loadRewardedVideo(const String &rewardedId);
     void showRewardedVideo();
 

@@ -1,7 +1,9 @@
 #include "godotAdmob.h"
 #import "app_delegate.h"
 
+#import <GoogleMobileAds/GADRequest.h>
 #import <GoogleMobileAds/GADMobileAds.h>
+#import <UnityAds/UADSMetaData.h>
 
 #if VERSION_MAJOR == 3
 #define CLASS_DB ClassDB
@@ -11,8 +13,6 @@
 
 
 GodotAdmob::GodotAdmob() {
-    ERR_FAIL_COND(instance != NULL);
-    instance = this;
     initialized = false;
 }
 
@@ -25,17 +25,19 @@ void GodotAdmob::init(bool isReal, int instanceId) {
         NSLog(@"GodotAdmob Module already initialized");
         return;
     }
-    
+    NSLog(@"Initialising GodotAdmob Module");
     initialized = true;
+    instance = this;
 
     [GADMobileAds configureWithApplicationID:@"ca-app-pub-1160358939410189~8221472002"];
 
+    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
+    [gdprConsentMetaData set:@"gdpr.consent" value:@YES];
+    [gdprConsentMetaData commit];
+
     banner = [AdmobBanner alloc];
     [banner initialize :isReal :instanceId];
-    
-    interstitial = [AdmobInterstitial alloc];
-    [interstitial initialize:isReal :instanceId];
-    
+
     rewarded = [AdmobRewarded alloc];
     [rewarded initialize:isReal :instanceId];
 }
@@ -94,27 +96,6 @@ int GodotAdmob::getBannerHeight() {
     return (uintptr_t)[banner getBannerHeight];
 }
 
-void GodotAdmob::loadInterstitial(const String &interstitialId) {
-    if (!initialized) {
-        NSLog(@"GodotAdmob Module not initialized");
-        return;
-    }
-    
-    NSString *idStr = [NSString stringWithCString:interstitialId.utf8().get_data() encoding: NSUTF8StringEncoding];
-    [interstitial loadInterstitial:idStr];
-
-}
-
-void GodotAdmob::showInterstitial() {
-    if (!initialized) {
-        NSLog(@"GodotAdmob Module not initialized");
-        return;
-    }
-    
-    [interstitial showInterstitial];
-    
-}
-
 void GodotAdmob::loadRewardedVideo(const String &rewardedId) {
     //init
     if (!initialized) {
@@ -144,8 +125,6 @@ void GodotAdmob::_bind_methods() {
     CLASS_DB::bind_method("loadBanner",&GodotAdmob::loadBanner);
     CLASS_DB::bind_method("showBanner",&GodotAdmob::showBanner);
     CLASS_DB::bind_method("hideBanner",&GodotAdmob::hideBanner);
-    CLASS_DB::bind_method("loadInterstitial",&GodotAdmob::loadInterstitial);
-    CLASS_DB::bind_method("showInterstitial",&GodotAdmob::showInterstitial);
     CLASS_DB::bind_method("loadRewardedVideo",&GodotAdmob::loadRewardedVideo);
     CLASS_DB::bind_method("showRewardedVideo",&GodotAdmob::showRewardedVideo);
     CLASS_DB::bind_method("resize",&GodotAdmob::resize);
