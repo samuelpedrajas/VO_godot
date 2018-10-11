@@ -100,6 +100,30 @@ public class GodotAdMob extends Godot.SingletonBase
 								reward.getAmount()));
 						GodotLib.calldeferred(instance_id, "_on_rewarded", new Object[] { reward.getType(), reward.getAmount() });
 					}
+
+					@Override
+					public void onRewardedVideoCompleted() {
+						Log.w("godot", "AdMob: onRewardedVideoCompleted");
+						// GodotLib.calldeferred(instance_id, "_on_rewarded_video_completed", new Object[] { });
+					}
+
+					@Override
+					public void onRewardedVideoAdLeftApplication() {
+						Log.w("godot", "AdMob: onRewardedVideoAdLeftApplication");
+						// GodotLib.calldeferred(instance_id, "_on_rewarded_video_ad_left_application", new Object[] { });
+					}
+
+					@Override
+					public void onRewardedVideoStarted() {
+						Log.w("godot", "AdMob: onRewardedVideoStarted");
+						// GodotLib.calldeferred(instance_id, "_on_rewarded_video_started", new Object[] { });
+					}
+
+					@Override
+					public void onRewardedVideoAdOpened() {
+						Log.w("godot", "AdMob: onRewardedVideoAdOpened");
+						// GodotLib.calldeferred(instance_id, "_on_rewarded_video_ad_opened", new Object[] { });
+					}
 				});
 
 			}
