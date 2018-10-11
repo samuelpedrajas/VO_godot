@@ -7,16 +7,16 @@
       >
 <supports-screens android:smallScreens="false"
                       android:normalScreens="true"
-                      android:largeScreens="true"
-                      android:xlargeScreens="true"/>
+                      android:largeScreens="false"
+                      android:xlargeScreens="false"/>
 
     <application android:label="@string/godot_project_name_string" android:icon="@drawable/icon" android:allowBackup="false" $$ADD_APPATTRIBUTE_CHUNKS$$ >
         <activity android:name="org.godotengine.godot.Godot"
                   android:label="@string/godot_project_name_string"
                   android:theme="@style/LauncherTheme"
                   android:launchMode="singleTask"
-                  android:screenOrientation="user"
-                  android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize"
+                  android:screenOrientation="portrait"
+                  android:configChanges=""
                   android:resizeableActivity="false">
 
             <intent-filter>
@@ -36,6 +36,6 @@ $$ADD_APPLICATION_CHUNKS$$
 
 $$ADD_PERMISSION_CHUNKS$$
 
-<uses-sdk android:minSdkVersion="18" android:targetSdkVersion="27"/>
+<uses-sdk android:minSdkVersion="19" android:targetSdkVersion="28"/>
 
 </manifest>

@@ -883,6 +883,7 @@ static void _initialize_java_modules() {
 				ERR_EXPLAIN("Couldn't find proper initialize function 'public static Godot.SingletonBase Class::initialize(Activity p_activity)' initializer for singleton class: " + m);
 				ERR_CONTINUE(!initialize);
 			}
+			env->CallStaticObjectMethod(singletonClass, initialize, _godot_instance);
 		}
 	}
 }

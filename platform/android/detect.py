@@ -147,7 +147,7 @@ def configure(env):
             env.Append(LINKFLAGS=['-Os'])
         else:
             env.Append(LINKFLAGS=['-Os']) #custom optimization
-            env.Append(CPPFLAGS=['-Os', '-DNDEBUG', '-ffast-math', '-funsafe-math-optimizations', '-fomit-frame-pointer'])
+            env.Append(CPPFLAGS=['-Os', '-DNDEBUG', '-fomit-frame-pointer'])
 
         if (can_vectorize):
             env.Append(CPPFLAGS=['-ftree-vectorize'])
