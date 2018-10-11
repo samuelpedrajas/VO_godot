@@ -7,8 +7,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import android.app.Activity;
-import android.widget.FrameLayout;
-import android.view.ViewGroup.LayoutParams;
+// import android.widget.FrameLayout;
+// import android.view.ViewGroup.LayoutParams;
 import android.provider.Settings;
 import android.graphics.Color;
 import android.util.Log;
@@ -32,13 +32,13 @@ public class GodotAdMob extends Godot.SingletonBase
 	private Activity activity = null; // The main activity of the game
 	private int instance_id = 0;
 
-	private AdView adView = null; // Banner view
+	// private AdView adView = null; // Banner view
 
 	private boolean isReal = false; // Store if is real or not
 	private boolean isLoading = false;
 
-	private FrameLayout layout = null; // Store the layout
-	private FrameLayout.LayoutParams adParams = null; // Store the layout params
+	// private FrameLayout layout = null; // Store the layout
+	// private FrameLayout.LayoutParams adParams = null; // Store the layout params
 
 	private RewardedVideoAd rewardedVideoAd = null; // Rewarded Video object
 
@@ -175,176 +175,176 @@ public class GodotAdMob extends Godot.SingletonBase
 	}
 
 
-	/* Banner
-	 * ********************************************************************** */
+	// /* Banner
+	//  * ********************************************************************** */
 
-	/**
-	 * Load a banner
-	 * @param String id AdMod Banner ID
-	 * @param boolean isOnTop To made the banner top or bottom
-	 */
-	public void loadBanner(final String id, final boolean isOnTop)
-	{
-		activity.runOnUiThread(new Runnable()
-		{
-			@Override public void run()
-			{
-				layout = ((Godot) activity).layout;
-				adParams = new FrameLayout.LayoutParams(
-					FrameLayout.LayoutParams.MATCH_PARENT,
-					FrameLayout.LayoutParams.WRAP_CONTENT
-				);
-				if(isOnTop) adParams.gravity = Gravity.TOP;
-				else adParams.gravity = Gravity.BOTTOM;
+	// /**
+	//  * Load a banner
+	//  * @param String id AdMod Banner ID
+	//  * @param boolean isOnTop To made the banner top or bottom
+	//  */
+	// public void loadBanner(final String id, final boolean isOnTop)
+	// {
+	// 	activity.runOnUiThread(new Runnable()
+	// 	{
+	// 		@Override public void run()
+	// 		{
+	// 			layout = ((Godot) activity).layout;
+	// 			adParams = new FrameLayout.LayoutParams(
+	// 				FrameLayout.LayoutParams.MATCH_PARENT,
+	// 				FrameLayout.LayoutParams.WRAP_CONTENT
+	// 			);
+	// 			if(isOnTop) adParams.gravity = Gravity.TOP;
+	// 			else adParams.gravity = Gravity.BOTTOM;
 
-				adView = new AdView(activity);
-				adView.setAdUnitId(id);
+	// 			adView = new AdView(activity);
+	// 			adView.setAdUnitId(id);
 
-				adView.setBackgroundColor(Color.TRANSPARENT);
+	// 			adView.setBackgroundColor(Color.TRANSPARENT);
 
-				adView.setAdSize(AdSize.SMART_BANNER);
-				adView.setAdListener(new AdListener()
-				{
-					@Override
-					public void onAdLoaded() {
-						Log.w("godot", "AdMob: onAdLoaded");
-						GodotLib.calldeferred(instance_id, "_on_admob_ad_loaded", new Object[]{ });
-					}
+	// 			adView.setAdSize(AdSize.SMART_BANNER);
+	// 			adView.setAdListener(new AdListener()
+	// 			{
+	// 				@Override
+	// 				public void onAdLoaded() {
+	// 					Log.w("godot", "AdMob: onAdLoaded");
+	// 					GodotLib.calldeferred(instance_id, "_on_admob_ad_loaded", new Object[]{ });
+	// 				}
 
-					@Override
-					public void onAdFailedToLoad(int errorCode)
-					{
-						String	str;
-						switch(errorCode) {
-							case AdRequest.ERROR_CODE_INTERNAL_ERROR:
-								str	= "ERROR_CODE_INTERNAL_ERROR";
-								break;
-							case AdRequest.ERROR_CODE_INVALID_REQUEST:
-								str	= "ERROR_CODE_INVALID_REQUEST";
-								break;
-							case AdRequest.ERROR_CODE_NETWORK_ERROR:
-								str	= "ERROR_CODE_NETWORK_ERROR";
-								GodotLib.calldeferred(instance_id, "_on_admob_network_error", new Object[]{ });
-								break;
-							case AdRequest.ERROR_CODE_NO_FILL:
-								str	= "ERROR_CODE_NO_FILL";
-								break;
-							default:
-								str	= "Code: " + errorCode;
-								break;
-						}
-						Log.w("godot", "AdMob: onAdFailedToLoad -> " + str);
-					}
-				});
-				layout.addView(adView, adParams);
+	// 				@Override
+	// 				public void onAdFailedToLoad(int errorCode)
+	// 				{
+	// 					String	str;
+	// 					switch(errorCode) {
+	// 						case AdRequest.ERROR_CODE_INTERNAL_ERROR:
+	// 							str	= "ERROR_CODE_INTERNAL_ERROR";
+	// 							break;
+	// 						case AdRequest.ERROR_CODE_INVALID_REQUEST:
+	// 							str	= "ERROR_CODE_INVALID_REQUEST";
+	// 							break;
+	// 						case AdRequest.ERROR_CODE_NETWORK_ERROR:
+	// 							str	= "ERROR_CODE_NETWORK_ERROR";
+	// 							GodotLib.calldeferred(instance_id, "_on_admob_network_error", new Object[]{ });
+	// 							break;
+	// 						case AdRequest.ERROR_CODE_NO_FILL:
+	// 							str	= "ERROR_CODE_NO_FILL";
+	// 							break;
+	// 						default:
+	// 							str	= "Code: " + errorCode;
+	// 							break;
+	// 					}
+	// 					Log.w("godot", "AdMob: onAdFailedToLoad -> " + str);
+	// 				}
+	// 			});
+	// 			layout.addView(adView, adParams);
 
-				// Request
-				AdRequest.Builder adBuilder = new AdRequest.Builder();
-				adBuilder.tagForChildDirectedTreatment(true);
-				if (!isReal) {
-					adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
-					adBuilder.addTestDevice(getAdmobDeviceId());
-				}
-				adView.loadAd(adBuilder.build());
-			}
-		});
-	}
+	// 			// Request
+	// 			AdRequest.Builder adBuilder = new AdRequest.Builder();
+	// 			adBuilder.tagForChildDirectedTreatment(true);
+	// 			if (!isReal) {
+	// 				adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
+	// 				adBuilder.addTestDevice(getAdmobDeviceId());
+	// 			}
+	// 			adView.loadAd(adBuilder.build());
+	// 		}
+	// 	});
+	// }
 
-	/**
-	 * Show the banner
-	 */
-	public void showBanner()
-	{
-		activity.runOnUiThread(new Runnable()
-		{
-			@Override public void run()
-			{
-				if (adView.getVisibility() == View.VISIBLE) return;
-				adView.setVisibility(View.VISIBLE);
-				adView.resume();
-				Log.d("godot", "AdMob: Show Banner");
-			}
-		});
-	}
+	// /**
+	//  * Show the banner
+	//  */
+	// public void showBanner()
+	// {
+	// 	activity.runOnUiThread(new Runnable()
+	// 	{
+	// 		@Override public void run()
+	// 		{
+	// 			if (adView.getVisibility() == View.VISIBLE) return;
+	// 			adView.setVisibility(View.VISIBLE);
+	// 			adView.resume();
+	// 			Log.d("godot", "AdMob: Show Banner");
+	// 		}
+	// 	});
+	// }
 
-	/**
-	 * Resize the banner
-	 *
-	 */
-	public void resize()
-	{
-		activity.runOnUiThread(new Runnable()
-		{
-			@Override public void run()
-			{
-				if (layout == null || adView == null || adParams == null)
-				{
-					return;
-				}
+	// /**
+	//  * Resize the banner
+	//  *
+	//  */
+	// public void resize()
+	// {
+	// 	activity.runOnUiThread(new Runnable()
+	// 	{
+	// 		@Override public void run()
+	// 		{
+	// 			if (layout == null || adView == null || adParams == null)
+	// 			{
+	// 				return;
+	// 			}
 
-				layout.removeView(adView); // Remove the old view
+	// 			layout.removeView(adView); // Remove the old view
 
-				// Extract params
+	// 			// Extract params
 
-				int gravity = adParams.gravity;
-				FrameLayout	layout = ((Godot)activity).layout;
-				adParams = new FrameLayout.LayoutParams(
-					FrameLayout.LayoutParams.MATCH_PARENT,
-					FrameLayout.LayoutParams.WRAP_CONTENT
-				);
-				adParams.gravity = gravity;
-				AdListener adListener = adView.getAdListener();
-				String id = adView.getAdUnitId();
+	// 			int gravity = adParams.gravity;
+	// 			FrameLayout	layout = ((Godot)activity).layout;
+	// 			adParams = new FrameLayout.LayoutParams(
+	// 				FrameLayout.LayoutParams.MATCH_PARENT,
+	// 				FrameLayout.LayoutParams.WRAP_CONTENT
+	// 			);
+	// 			adParams.gravity = gravity;
+	// 			AdListener adListener = adView.getAdListener();
+	// 			String id = adView.getAdUnitId();
 
-				// Create new view & set old params
-				adView = new AdView(activity);
-				adView.setAdUnitId(id);
-				adView.setBackgroundColor(Color.TRANSPARENT);
-				adView.setAdSize(AdSize.SMART_BANNER);
-				adView.setAdListener(adListener);
+	// 			// Create new view & set old params
+	// 			adView = new AdView(activity);
+	// 			adView.setAdUnitId(id);
+	// 			adView.setBackgroundColor(Color.TRANSPARENT);
+	// 			adView.setAdSize(AdSize.SMART_BANNER);
+	// 			adView.setAdListener(adListener);
 
-				// Add to layout and load ad
-				layout.addView(adView, adParams);
+	// 			// Add to layout and load ad
+	// 			layout.addView(adView, adParams);
 
-				// Request
-				AdRequest.Builder adBuilder = new AdRequest.Builder();
-				adBuilder.tagForChildDirectedTreatment(true);
-				if (!isReal) {
-					adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
-					adBuilder.addTestDevice(getAdmobDeviceId());
-				}
-				adView.loadAd(adBuilder.build());
+	// 			// Request
+	// 			AdRequest.Builder adBuilder = new AdRequest.Builder();
+	// 			adBuilder.tagForChildDirectedTreatment(true);
+	// 			if (!isReal) {
+	// 				adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
+	// 				adBuilder.addTestDevice(getAdmobDeviceId());
+	// 			}
+	// 			adView.loadAd(adBuilder.build());
 
-				Log.d("godot", "AdMob: Banner Resized");
-			}
-		});
-	}
+	// 			Log.d("godot", "AdMob: Banner Resized");
+	// 		}
+	// 	});
+	// }
 
-	/**
-	 * Hide the banner
-	 */
-	public void hideBanner()
-	{
-		activity.runOnUiThread(new Runnable()
-		{
-			@Override public void run()
-			{
-				if (adView.getVisibility() == View.GONE) return;
-				adView.setVisibility(View.GONE);
-				adView.pause();
-				Log.d("godot", "AdMob: Hide Banner");
-			}
-		});
-	}
+	// /**
+	//  * Hide the banner
+	//  */
+	// public void hideBanner()
+	// {
+	// 	activity.runOnUiThread(new Runnable()
+	// 	{
+	// 		@Override public void run()
+	// 		{
+	// 			if (adView.getVisibility() == View.GONE) return;
+	// 			adView.setVisibility(View.GONE);
+	// 			adView.pause();
+	// 			Log.d("godot", "AdMob: Hide Banner");
+	// 		}
+	// 	});
+	// }
 
-	/**
-	 * Get the banner height
-	 * @return int Banner height
-	 */
-	public int getBannerHeight()
-	{
-		return (int)(AdSize.SMART_BANNER.getHeightInPixels(activity));
-	}
+	// /**
+	//  * Get the banner height
+	//  * @return int Banner height
+	//  */
+	// public int getBannerHeight()
+	// {
+	// 	return (int)(AdSize.SMART_BANNER.getHeightInPixels(activity));
+	// }
 
 
 	/* Utils
@@ -406,9 +406,7 @@ public class GodotAdMob extends Godot.SingletonBase
 	 */
 	public GodotAdMob(Activity p_activity) {
 		registerClass("AdMob", new String[] {
-			"init",
-			"loadBanner", "showBanner", "hideBanner", "getBannerWidth", "getBannerHeight", "resize",
-			"loadRewardedVideo", "showRewardedVideo"
+			"init", "loadRewardedVideo", "showRewardedVideo"
 		});
 		activity = p_activity;
 	}

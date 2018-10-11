@@ -7,8 +7,8 @@
 
 
 #ifdef __OBJC__
-@class AdmobBanner;
-typedef AdmobBanner *bannerPtr;
+// @class AdmobBanner;
+// typedef AdmobBanner *bannerPtr;
 @class AdmobRewarded;
 typedef AdmobRewarded *rewardedPtr;
 #else
@@ -29,7 +29,7 @@ class GodotAdmob : public Reference {
     bool initialized;
     GodotAdmob *instance;
     
-    bannerPtr banner;
+    // bannerPtr banner;
     rewardedPtr rewarded;
     
 
@@ -39,12 +39,12 @@ protected:
 public:
 
     void init(bool isReal, int instanceId);
-    void loadBanner(const String &bannerId, bool isOnTop);
-    void showBanner();
-    void hideBanner();
-    void resize();
-    int getBannerWidth();
-    int getBannerHeight();
+    // void loadBanner(const String &bannerId, bool isOnTop);
+    // void showBanner();
+    // void hideBanner();
+    // void resize();
+    // int getBannerWidth();
+    // int getBannerHeight();
     void loadRewardedVideo(const String &rewardedId);
     void showRewardedVideo();
 
