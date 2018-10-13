@@ -6,7 +6,7 @@
       android:installLocation="auto"
       >
 <supports-screens android:smallScreens="false"
-                      android:normalScreens="true"
+                      android:normalScreens="false"
                       android:largeScreens="false"
                       android:xlargeScreens="false"/>
 
