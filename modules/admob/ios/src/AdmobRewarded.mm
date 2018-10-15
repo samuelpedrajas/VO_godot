@@ -24,11 +24,13 @@
     isLoading = true;
     [GADRewardBasedVideoAd sharedInstance].delegate = self;
 
+    GADRequest *request = [GADRequest request];
+
     if(!isReal) {
-        [[GADRewardBasedVideoAd sharedInstance] loadRequest:[GADRequest request]
-                                               withAdUnitID:@"ca-app-pub-3940256099942544/1712485313"];
+        request.testDevices = [NSArray arrayWithObjects:kGADSimulatorID, @"C7F22689DFF0EF8E76C5F5DD35CB6995", @"c7f22689dff0ef8e76c5f5dd35cb6995", nil];
+        [[GADRewardBasedVideoAd sharedInstance] loadRequest:request withAdUnitID:@"ca-app-pub-3940256099942544/1712485313"];
     } else {
-        [[GADRewardBasedVideoAd sharedInstance] loadRequest:[GADRequest request] withAdUnitID:rewardedId];
+        [[GADRewardBasedVideoAd sharedInstance] loadRequest:request withAdUnitID:rewardedId];
     }
 }
 
