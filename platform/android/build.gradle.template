@@ -40,7 +40,9 @@ android {
 		exclude 'META-INF/NOTICE'
 	}
 	defaultConfig {
-		$$GRADLE_DEFAULT_CONFIG$$
+		applicationId 'com.vegames.veganodyssey'
+		minSdkVersion project.getProperties().get("MIN_SDK_VERSION")
+		targetSdkVersion 28
 	}
 	// Both signing and zip-aligning will be done at export time
 	buildTypes.all { buildType ->
