@@ -5,6 +5,8 @@ import com.google.android.gms.ads.*;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 import android.app.Activity;
 // import android.widget.FrameLayout;
@@ -25,6 +27,8 @@ import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 
 import com.unity3d.ads.metadata.MetaData;
 
+import com.google.ads.consent.*;
+
 
 public class GodotAdMob extends Godot.SingletonBase
 {
@@ -41,6 +45,8 @@ public class GodotAdMob extends Godot.SingletonBase
 	// private FrameLayout.LayoutParams adParams = null; // Store the layout params
 
 	private RewardedVideoAd rewardedVideoAd = null; // Rewarded Video object
+	private ConsentForm form = null;
+	private String lang = "en";
 
 	/* Init
 	 * ********************************************************************** */
@@ -49,16 +55,87 @@ public class GodotAdMob extends Godot.SingletonBase
 	 * Prepare for work with AdMob
 	 * @param boolean isReal Tell if the enviroment is for real or test
 	 */
-	public void init(boolean isReal, int instance_id)
+	public void init(boolean isReal, int instance_id, String lang)
 	{
 		this.isReal = isReal;
 		this.instance_id = instance_id;
+		this.lang = lang;
 
-		MetaData gdprMetaData = new MetaData(activity);
-		gdprMetaData.set("gdpr.consent", true);
-		gdprMetaData.commit();
+		requestConsent();
+		//MetaData gdprMetaData = new MetaData(activity);
+		//gdprMetaData.set("gdpr.consent", true);
+		//gdprMetaData.commit();
 
 		Log.d("godot", "AdMob: init");
+	}
+
+
+	public void requestConsent() {
+		ConsentInformation consentInformation = ConsentInformation.getInstance(activity);
+
+		// test!!!!!!!!!!!!!
+		consentInformation.addTestDevice("2A5096EECA8734236D655A85D1B05BA3");
+
+		String[] publisherIds = {"pub-1160358939410189"};
+		consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
+			@Override
+			public void onConsentInfoUpdated(ConsentStatus consentStatus) {
+				Log.w("godotAdmob", "Consent updated!!!!!!!!!!!!");
+				showConsentForm();
+			}
+
+			@Override
+			public void onFailedToUpdateConsentInfo(String errorDescription) {
+				Log.w("godotAdmob", "Consent error");
+				Log.w("godotAdmob", errorDescription);
+			}
+		});
+	}
+
+
+	public void showConsentForm() {
+		URL privacyUrl = null;
+		try {
+			if (lang.equals("es")) {
+				privacyUrl = new URL("https://veganodysseythegame.com/es/privacy-policy/");
+			} else {
+				privacyUrl = new URL("https://veganodysseythegame.com/privacy-policy/");
+			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			// Handle error.
+		}
+
+		form = new ConsentForm.Builder(activity, privacyUrl)
+			.withListener(new ConsentFormListener() {
+				@Override
+				public void onConsentFormLoaded() {
+					Log.w("godotAdmob", "Consent Form Loaded!!");
+					form.show();
+				}
+
+				@Override
+				public void onConsentFormOpened() {
+					Log.w("godotAdmob", "Consent Form Opened!!");
+				}
+
+				@Override
+				public void onConsentFormClosed(
+				ConsentStatus consentStatus, Boolean userPrefersAdFree) {
+					Log.w("godotAdmob", "Consent Form Closed");
+				}
+
+				@Override
+				public void onConsentFormError(String errorDescription) {
+					Log.w("godotAdmob", errorDescription);
+				}
+			})
+			.withPersonalizedAdsOption()
+			.withNonPersonalizedAdsOption()
+			.withAdFreeOption()
+			.build();
+		form.load();
+
 	}
 
 
@@ -149,6 +226,7 @@ public class GodotAdMob extends Godot.SingletonBase
 					AdRequest.Builder adBuilder = new AdRequest.Builder();
 					adBuilder.tagForChildDirectedTreatment(true);
 					if (!isReal) {
+						adBuilder.addTestDevice("2A5096EECA8734236D655A85D1B05BA3");
 						adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
 						adBuilder.addTestDevice(getAdmobDeviceId());
 					}

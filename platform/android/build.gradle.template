@@ -17,6 +17,9 @@ allprojects {
 	mavenCentral()
 	google()
 	$$GRADLE_REPOSITORY_URLS$$
+		flatDir {
+			dirs '../../../modules/admob/android/libs'
+		}
     }
 }
 
