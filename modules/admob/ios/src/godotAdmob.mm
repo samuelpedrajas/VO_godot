@@ -3,6 +3,8 @@
 
 #import <GoogleMobileAds/GADMobileAds.h>
 #import <UnityAds/UADSMetaData.h>
+#import <PersonalizedAdConsent/PersonalizedAdConsent.h>
+
 
 #if VERSION_MAJOR == 3
 #define CLASS_DB ClassDB
@@ -19,7 +21,7 @@ GodotAdmob::~GodotAdmob() {
     instance = NULL;
 }
 
-void GodotAdmob::init(bool isReal, int instanceId) {
+void GodotAdmob::init(bool isReal, int instanceId, String _lang) {
     if (initialized) {
         NSLog(@"GodotAdmob Module already initialized");
         return;
@@ -27,15 +29,60 @@ void GodotAdmob::init(bool isReal, int instanceId) {
     NSLog(@"Initialising GodotAdmob Module");
     initialized = true;
     instance = this;
+    lang = _lang
 
     [GADMobileAds configureWithApplicationID:@"ca-app-pub-1160358939410189~8221472002"];
 
-    UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
-    [gdprConsentMetaData set:@"gdpr.consent" value:@YES];
-    [gdprConsentMetaData commit];
+    //UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
+    //[gdprConsentMetaData set:@"gdpr.consent" value:@YES];
+    //[gdprConsentMetaData commit];
 
     rewarded = [AdmobRewarded alloc];
     [rewarded initialize:isReal :instanceId];
+}
+
+
+@implementation ViewController
+void viewDidLoad() {
+    [super viewDidLoad];
+
+    [PACConsentInformation.sharedInstance
+        requestConsentInfoUpdateForPublisherIdentifiers:@[ @"pub-1160358939410189" ]
+        completionHandler:^(NSError *_Nullable error) {
+            if (error) {
+                NSLog(@"Some error loading the view (Consent)");
+            } else {
+                showConsentForm();
+            }
+        }
+    ];
+}
+
+void GodotAdmob::showConsentForm() {
+    NSURL *privacyURL = [NSURL URLWithString:@"https://www.your.com/privacyurl"];
+    form = [[PACConsentForm alloc] initWithApplicationPrivacyPolicyURL:privacyURL];
+    form.shouldOfferPersonalizedAds = YES;
+    form.shouldOfferNonPersonalizedAds = YES;
+    form.shouldOfferAdFree = YES;
+
+    [form loadWithCompletionHandler:^(NSError *_Nullable error) {
+        NSLog(@"Load complete. Error: %@", error);
+        if (error) {
+            NSLog(@"Some error loading the form (Consent)");
+        } else {
+            [form presentFromViewController:self
+                dismissCompletion:^(NSError *_Nullable error, BOOL userPrefersAdFree) {
+                if (error) {
+                    NSLog(@"Some error showing the form (Consent)");
+                } else if (userPrefersAdFree) {
+                    NSLog(@"Prefers ad free (Consent)");
+                } else {
+                    // Check the user's consent choice.
+                    PACConsentStatus *status = PACConsentInformation.sharedInstance.consentStatus;
+                }
+            }];
+        }
+    }];
 }
 
 
