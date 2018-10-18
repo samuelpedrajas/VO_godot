@@ -31,6 +31,8 @@ class GodotAdmob : public Reference {
     
     // bannerPtr banner;
     rewardedPtr rewarded;
+    String lang;
+    PACConsentForm *form;
     
 
 protected:
@@ -38,7 +40,7 @@ protected:
 
 public:
 
-    void init(bool isReal, int instanceId);
+    void init(bool isReal, int instanceId, String lang);
     // void loadBanner(const String &bannerId, bool isOnTop);
     // void showBanner();
     // void hideBanner();
