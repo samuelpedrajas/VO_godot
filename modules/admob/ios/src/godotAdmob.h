@@ -52,6 +52,7 @@ public:
     void loadRewardedVideo(const String &rewardedId);
     void showRewardedVideo();
     void requestConsent();
+    void loadConsentForm();
     void showConsentForm();
 
     GodotAdmob();

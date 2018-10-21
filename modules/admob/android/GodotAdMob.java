@@ -61,12 +61,28 @@ public class GodotAdMob extends Godot.SingletonBase
 		this.instance_id = instance_id;
 		this.lang = lang;
 
-		requestConsent();
 		//MetaData gdprMetaData = new MetaData(activity);
 		//gdprMetaData.set("gdpr.consent", true);
 		//gdprMetaData.commit();
 
 		Log.d("godot", "AdMob: init");
+	}
+
+
+	private String getConsentStatus(ConsentStatus consentStatus) {
+		String status = "unknown";
+		if (consentStatus == ConsentStatus.PERSONALIZED) {
+			Log.w("godotAdmob", "consentStatus is personalized");
+			return "personalized";
+		} else if (consentStatus == ConsentStatus.NON_PERSONALIZED) {
+			Log.w("godotAdmob", "consentStatus is non personalized");
+			return "non_personalized";
+		} else if (consentStatus == ConsentStatus.UNKNOWN) {
+			Log.w("godotAdmob", "consentStatus is unkown");
+			return "unknown";
+		}
+		Log.w("godotAdmob", "consentStatus is none of the 3!");
+		return "unknown";
 	}
 
 
@@ -80,20 +96,20 @@ public class GodotAdMob extends Godot.SingletonBase
 		consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
 			@Override
 			public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-				Log.w("godotAdmob", "Consent updated!!!!!!!!!!!!");
-				showConsentForm();
+				String status = getConsentStatus(consentStatus);
+				GodotLib.calldeferred(instance_id, "_on_consent_info_updated", new Object[] { status });
 			}
 
 			@Override
 			public void onFailedToUpdateConsentInfo(String errorDescription) {
 				Log.w("godotAdmob", "Consent error");
-				Log.w("godotAdmob", errorDescription);
+				GodotLib.calldeferred(instance_id, "_on_consent_failed_to_update", new Object[] { errorDescription });
 			}
 		});
 	}
 
 
-	public void showConsentForm() {
+	public void loadConsentForm() {
 		URL privacyUrl = null;
 		try {
 			if (lang.equals("es")) {
@@ -103,7 +119,6 @@ public class GodotAdMob extends Godot.SingletonBase
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-			// Handle error.
 		}
 
 		form = new ConsentForm.Builder(activity, privacyUrl)
@@ -111,7 +126,7 @@ public class GodotAdMob extends Godot.SingletonBase
 				@Override
 				public void onConsentFormLoaded() {
 					Log.w("godotAdmob", "Consent Form Loaded!!");
-					form.show();
+					GodotLib.calldeferred(instance_id, "_on_consent_form_loaded", new Object[] { });
 				}
 
 				@Override
@@ -123,11 +138,14 @@ public class GodotAdMob extends Godot.SingletonBase
 				public void onConsentFormClosed(
 				ConsentStatus consentStatus, Boolean userPrefersAdFree) {
 					Log.w("godotAdmob", "Consent Form Closed");
+					String status = getConsentStatus(consentStatus);
+					GodotLib.calldeferred(instance_id, "_on_consent_form_closed", new Object[] { status, userPrefersAdFree });
 				}
 
 				@Override
 				public void onConsentFormError(String errorDescription) {
 					Log.w("godotAdmob", errorDescription);
+					GodotLib.calldeferred(instance_id, "_on_consent_form_error", new Object[] { errorDescription });
 				}
 			})
 			.withPersonalizedAdsOption()
@@ -135,6 +153,14 @@ public class GodotAdMob extends Godot.SingletonBase
 			.withAdFreeOption()
 			.build();
 		form.load();
+
+	}
+
+
+	public void showConsentForm() {
+		if (form != null) {
+			form.show();
+		}
 
 	}
 
@@ -484,7 +510,8 @@ public class GodotAdMob extends Godot.SingletonBase
 	 */
 	public GodotAdMob(Activity p_activity) {
 		registerClass("AdMob", new String[] {
-			"init", "loadRewardedVideo", "showRewardedVideo"
+			"init", "loadRewardedVideo", "showRewardedVideo",
+			"requestConsent", "loadConsentForm", "showConsentForm"
 		});
 		activity = p_activity;
 	}
