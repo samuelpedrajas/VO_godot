@@ -78,7 +78,7 @@ public class GodotAdMob extends Godot.SingletonBase
 			Log.w("godotAdmob", "consentStatus is non personalized");
 			return "non_personalized";
 		} else if (consentStatus == ConsentStatus.UNKNOWN) {
-			Log.w("godotAdmob", "consentStatus is unkown");
+			Log.w("godotAdmob", "consentStatus is unknown");
 			return "unknown";
 		}
 		Log.w("godotAdmob", "consentStatus is none of the 3!");
@@ -87,80 +87,97 @@ public class GodotAdMob extends Godot.SingletonBase
 
 
 	public void requestConsent() {
-		ConsentInformation consentInformation = ConsentInformation.getInstance(activity);
+		activity.runOnUiThread(new Runnable()
+		{
+			@Override public void run()
+			{
+				ConsentInformation consentInformation = ConsentInformation.getInstance(activity);
 
-		// test!!!!!!!!!!!!!
-		consentInformation.addTestDevice("2A5096EECA8734236D655A85D1B05BA3");
+				// test!!!!!!!!!!!!!
+				consentInformation.addTestDevice("2A5096EECA8734236D655A85D1B05BA3");
 
-		String[] publisherIds = {"pub-1160358939410189"};
-		consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
-			@Override
-			public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-				String status = getConsentStatus(consentStatus);
-				GodotLib.calldeferred(instance_id, "_on_consent_info_updated", new Object[] { status });
-			}
+				String[] publisherIds = {"pub-1160358939410189"};
+				consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
+					@Override
+					public void onConsentInfoUpdated(ConsentStatus consentStatus) {
+						String status = getConsentStatus(consentStatus);
+						GodotLib.calldeferred(instance_id, "_on_consent_info_updated", new Object[] { status });
+					}
 
-			@Override
-			public void onFailedToUpdateConsentInfo(String errorDescription) {
-				Log.w("godotAdmob", "Consent error");
-				GodotLib.calldeferred(instance_id, "_on_consent_failed_to_update", new Object[] { errorDescription });
+					@Override
+					public void onFailedToUpdateConsentInfo(String errorDescription) {
+						Log.w("godotAdmob", "Consent error");
+						GodotLib.calldeferred(instance_id, "_on_consent_failed_to_update", new Object[] { errorDescription });
+					}
+				});
 			}
 		});
 	}
 
 
 	public void loadConsentForm() {
-		URL privacyUrl = null;
-		try {
-			if (lang.equals("es")) {
-				privacyUrl = new URL("https://veganodysseythegame.com/es/privacy-policy/");
-			} else {
-				privacyUrl = new URL("https://veganodysseythegame.com/privacy-policy/");
+		activity.runOnUiThread(new Runnable()
+		{
+			@Override public void run()
+			{
+				URL privacyUrl = null;
+				try {
+					if (lang.equals("es")) {
+						privacyUrl = new URL("https://veganodysseythegame.com/es/privacy-policy/");
+					} else {
+						privacyUrl = new URL("https://veganodysseythegame.com/privacy-policy/");
+					}
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				form = new ConsentForm.Builder(activity, privacyUrl)
+					.withListener(new ConsentFormListener() {
+						@Override
+						public void onConsentFormLoaded() {
+							Log.w("godotAdmob", "Consent Form Loaded!!");
+							GodotLib.calldeferred(instance_id, "_on_consent_form_loaded", new Object[] { });
+						}
+
+						@Override
+						public void onConsentFormOpened() {
+							Log.w("godotAdmob", "Consent Form Opened!!");
+						}
+
+						@Override
+						public void onConsentFormClosed(
+						ConsentStatus consentStatus, Boolean userPrefersAdFree) {
+							Log.w("godotAdmob", "Consent Form Closed");
+							String status = getConsentStatus(consentStatus);
+							GodotLib.calldeferred(instance_id, "_on_consent_form_closed", new Object[] { status, userPrefersAdFree });
+						}
+
+						@Override
+						public void onConsentFormError(String errorDescription) {
+							Log.w("godotAdmob", errorDescription);
+							GodotLib.calldeferred(instance_id, "_on_consent_form_error", new Object[] { errorDescription });
+						}
+					})
+					.withPersonalizedAdsOption()
+					.withNonPersonalizedAdsOption()
+					.withAdFreeOption()
+					.build();
+				form.load();
 			}
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-
-		form = new ConsentForm.Builder(activity, privacyUrl)
-			.withListener(new ConsentFormListener() {
-				@Override
-				public void onConsentFormLoaded() {
-					Log.w("godotAdmob", "Consent Form Loaded!!");
-					GodotLib.calldeferred(instance_id, "_on_consent_form_loaded", new Object[] { });
-				}
-
-				@Override
-				public void onConsentFormOpened() {
-					Log.w("godotAdmob", "Consent Form Opened!!");
-				}
-
-				@Override
-				public void onConsentFormClosed(
-				ConsentStatus consentStatus, Boolean userPrefersAdFree) {
-					Log.w("godotAdmob", "Consent Form Closed");
-					String status = getConsentStatus(consentStatus);
-					GodotLib.calldeferred(instance_id, "_on_consent_form_closed", new Object[] { status, userPrefersAdFree });
-				}
-
-				@Override
-				public void onConsentFormError(String errorDescription) {
-					Log.w("godotAdmob", errorDescription);
-					GodotLib.calldeferred(instance_id, "_on_consent_form_error", new Object[] { errorDescription });
-				}
-			})
-			.withPersonalizedAdsOption()
-			.withNonPersonalizedAdsOption()
-			.withAdFreeOption()
-			.build();
-		form.load();
-
+		});
 	}
 
 
 	public void showConsentForm() {
-		if (form != null) {
-			form.show();
-		}
+		activity.runOnUiThread(new Runnable()
+		{
+			@Override public void run()
+			{
+				if (form != null) {
+					form.show();
+				}
+			}
+		});
 
 	}
 
@@ -277,178 +294,6 @@ public class GodotAdMob extends Godot.SingletonBase
 			}
 		});
 	}
-
-
-	// /* Banner
-	//  * ********************************************************************** */
-
-	// /**
-	//  * Load a banner
-	//  * @param String id AdMod Banner ID
-	//  * @param boolean isOnTop To made the banner top or bottom
-	//  */
-	// public void loadBanner(final String id, final boolean isOnTop)
-	// {
-	// 	activity.runOnUiThread(new Runnable()
-	// 	{
-	// 		@Override public void run()
-	// 		{
-	// 			layout = ((Godot) activity).layout;
-	// 			adParams = new FrameLayout.LayoutParams(
-	// 				FrameLayout.LayoutParams.MATCH_PARENT,
-	// 				FrameLayout.LayoutParams.WRAP_CONTENT
-	// 			);
-	// 			if(isOnTop) adParams.gravity = Gravity.TOP;
-	// 			else adParams.gravity = Gravity.BOTTOM;
-
-	// 			adView = new AdView(activity);
-	// 			adView.setAdUnitId(id);
-
-	// 			adView.setBackgroundColor(Color.TRANSPARENT);
-
-	// 			adView.setAdSize(AdSize.SMART_BANNER);
-	// 			adView.setAdListener(new AdListener()
-	// 			{
-	// 				@Override
-	// 				public void onAdLoaded() {
-	// 					Log.w("godot", "AdMob: onAdLoaded");
-	// 					GodotLib.calldeferred(instance_id, "_on_admob_ad_loaded", new Object[]{ });
-	// 				}
-
-	// 				@Override
-	// 				public void onAdFailedToLoad(int errorCode)
-	// 				{
-	// 					String	str;
-	// 					switch(errorCode) {
-	// 						case AdRequest.ERROR_CODE_INTERNAL_ERROR:
-	// 							str	= "ERROR_CODE_INTERNAL_ERROR";
-	// 							break;
-	// 						case AdRequest.ERROR_CODE_INVALID_REQUEST:
-	// 							str	= "ERROR_CODE_INVALID_REQUEST";
-	// 							break;
-	// 						case AdRequest.ERROR_CODE_NETWORK_ERROR:
-	// 							str	= "ERROR_CODE_NETWORK_ERROR";
-	// 							GodotLib.calldeferred(instance_id, "_on_admob_network_error", new Object[]{ });
-	// 							break;
-	// 						case AdRequest.ERROR_CODE_NO_FILL:
-	// 							str	= "ERROR_CODE_NO_FILL";
-	// 							break;
-	// 						default:
-	// 							str	= "Code: " + errorCode;
-	// 							break;
-	// 					}
-	// 					Log.w("godot", "AdMob: onAdFailedToLoad -> " + str);
-	// 				}
-	// 			});
-	// 			layout.addView(adView, adParams);
-
-	// 			// Request
-	// 			AdRequest.Builder adBuilder = new AdRequest.Builder();
-	// 			adBuilder.tagForChildDirectedTreatment(true);
-	// 			if (!isReal) {
-	// 				adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
-	// 				adBuilder.addTestDevice(getAdmobDeviceId());
-	// 			}
-	// 			adView.loadAd(adBuilder.build());
-	// 		}
-	// 	});
-	// }
-
-	// /**
-	//  * Show the banner
-	//  */
-	// public void showBanner()
-	// {
-	// 	activity.runOnUiThread(new Runnable()
-	// 	{
-	// 		@Override public void run()
-	// 		{
-	// 			if (adView.getVisibility() == View.VISIBLE) return;
-	// 			adView.setVisibility(View.VISIBLE);
-	// 			adView.resume();
-	// 			Log.d("godot", "AdMob: Show Banner");
-	// 		}
-	// 	});
-	// }
-
-	// /**
-	//  * Resize the banner
-	//  *
-	//  */
-	// public void resize()
-	// {
-	// 	activity.runOnUiThread(new Runnable()
-	// 	{
-	// 		@Override public void run()
-	// 		{
-	// 			if (layout == null || adView == null || adParams == null)
-	// 			{
-	// 				return;
-	// 			}
-
-	// 			layout.removeView(adView); // Remove the old view
-
-	// 			// Extract params
-
-	// 			int gravity = adParams.gravity;
-	// 			FrameLayout	layout = ((Godot)activity).layout;
-	// 			adParams = new FrameLayout.LayoutParams(
-	// 				FrameLayout.LayoutParams.MATCH_PARENT,
-	// 				FrameLayout.LayoutParams.WRAP_CONTENT
-	// 			);
-	// 			adParams.gravity = gravity;
-	// 			AdListener adListener = adView.getAdListener();
-	// 			String id = adView.getAdUnitId();
-
-	// 			// Create new view & set old params
-	// 			adView = new AdView(activity);
-	// 			adView.setAdUnitId(id);
-	// 			adView.setBackgroundColor(Color.TRANSPARENT);
-	// 			adView.setAdSize(AdSize.SMART_BANNER);
-	// 			adView.setAdListener(adListener);
-
-	// 			// Add to layout and load ad
-	// 			layout.addView(adView, adParams);
-
-	// 			// Request
-	// 			AdRequest.Builder adBuilder = new AdRequest.Builder();
-	// 			adBuilder.tagForChildDirectedTreatment(true);
-	// 			if (!isReal) {
-	// 				adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
-	// 				adBuilder.addTestDevice(getAdmobDeviceId());
-	// 			}
-	// 			adView.loadAd(adBuilder.build());
-
-	// 			Log.d("godot", "AdMob: Banner Resized");
-	// 		}
-	// 	});
-	// }
-
-	// /**
-	//  * Hide the banner
-	//  */
-	// public void hideBanner()
-	// {
-	// 	activity.runOnUiThread(new Runnable()
-	// 	{
-	// 		@Override public void run()
-	// 		{
-	// 			if (adView.getVisibility() == View.GONE) return;
-	// 			adView.setVisibility(View.GONE);
-	// 			adView.pause();
-	// 			Log.d("godot", "AdMob: Hide Banner");
-	// 		}
-	// 	});
-	// }
-
-	// /**
-	//  * Get the banner height
-	//  * @return int Banner height
-	//  */
-	// public int getBannerHeight()
-	// {
-	// 	return (int)(AdSize.SMART_BANNER.getHeightInPixels(activity));
-	// }
 
 
 	/* Utils
