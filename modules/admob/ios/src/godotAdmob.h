@@ -36,6 +36,7 @@ class GodotAdmob : public Reference {
     rewardedPtr rewarded;
     String lang;
     formPtr form;
+    Object *obj;
 
 protected:
     static void _bind_methods();

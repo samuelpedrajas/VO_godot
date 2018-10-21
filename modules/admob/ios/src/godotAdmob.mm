@@ -32,6 +32,7 @@ void GodotAdmob::init(bool isReal, int instanceId, String _lang) {
     initialized = true;
     instance = this;
     lang = _lang;
+    obj = ObjectDB::get_instance(instanceId);
 
     [GADMobileAds configureWithApplicationID:@"ca-app-pub-1160358939410189~8221472002"];
 
@@ -44,15 +45,15 @@ void GodotAdmob::init(bool isReal, int instanceId, String _lang) {
 }
 
 
-String GodotAdmob::getConsentStatus(PACConsentStatus consentStatus) {
+String getConsentStatus(PACConsentStatus consentStatus) {
     String status = "unknown";
-    if (consentStatus == PACConsentStatus.PERSONALIZED) {
+    if (consentStatus == PACConsentStatusPersonalized) {
         NSLog(@"consentStatus is personalized");
         status = "personalized";
-    } else if(consentStatus == PACConsentStatus.NON_PERSONALIZED) {
+    } else if (consentStatus == PACConsentStatusNonPersonalized) {
         NSLog(@"consentStatus is non personalized");
         status = "non_personalized";
-    } else if(consentStatus == PACConsentStatus.UNKNOWN) {
+    } else if (consentStatus == PACConsentStatusUnknown) {
         NSLog(@"consentStatus is unkown");
         status = "unknown";
     } else {
@@ -68,12 +69,12 @@ void GodotAdmob::requestConsent() {
         completionHandler:^(NSError *_Nullable error) {
             if (error) {
                 NSLog(@"Some error requesting consent");
-                rewarded.obj->call_deferred("_on_consent_failed_to_update", "error while requesting consent");
+                obj->call_deferred("_on_consent_failed_to_update", "error while requesting consent");
             } else {
-                PACConsentStatus *consentStatus =
+                PACConsentStatus consentStatus =
                     PACConsentInformation.sharedInstance.consentStatus;
                 String status = getConsentStatus(consentStatus);
-                rewarded.obj->call_deferred("_on_consent_info_updated", status);
+                obj->call_deferred("_on_consent_info_updated", status);
             }
         }
     ];
@@ -98,9 +99,9 @@ void GodotAdmob::loadConsentForm() {
         NSLog(@"Load complete. Error: %@", error);
         if (error) {
             NSLog(@"Some error loading the form (Consent)");
-            rewarded.obj->call_deferred("_on_consent_form_error", "error while loading the consent request");
+            obj->call_deferred("_on_consent_form_error", "error while loading the consent request");
         } else {
-            rewarded.obj->call_deferred("_on_consent_form_loaded", status);
+            obj->call_deferred("_on_consent_form_loaded");
         }
     }];
 }
@@ -113,13 +114,13 @@ void GodotAdmob::showConsentForm() {
         if (error) {
             NSLog(@"Some error showing the form (Consent)");
 
-            rewarded.obj->call_deferred("_on_consent_form_error", "error while showing consent form");
+            obj->call_deferred("_on_consent_form_error", "error while showing consent form");
         } else {
-            PACConsentStatus *consentStatus =
+            PACConsentStatus consentStatus =
                 PACConsentInformation.sharedInstance.consentStatus;
             String status = getConsentStatus(consentStatus);
 
-            rewarded.obj->call_deferred("_on_consent_form_closed", status, userPrefersAdFree);
+            obj->call_deferred("_on_consent_form_closed", status, userPrefersAdFree);
         }
     }];
 }
