@@ -29,7 +29,9 @@ void GodotAdmob::init(bool isReal, int instanceId, String _lang) {
     NSLog(@"Initialising GodotAdmob Module");
     initialized = true;
     instance = this;
-    lang = _lang
+    lang = _lang;
+
+    requestConsent();
 
     [GADMobileAds configureWithApplicationID:@"ca-app-pub-1160358939410189~8221472002"];
 
@@ -42,10 +44,7 @@ void GodotAdmob::init(bool isReal, int instanceId, String _lang) {
 }
 
 
-@implementation ViewController
-void viewDidLoad() {
-    [super viewDidLoad];
-
+void GodotAdmob::requestConsent() {
     [PACConsentInformation.sharedInstance
         requestConsentInfoUpdateForPublisherIdentifiers:@[ @"pub-1160358939410189" ]
         completionHandler:^(NSError *_Nullable error) {
@@ -59,7 +58,14 @@ void viewDidLoad() {
 }
 
 void GodotAdmob::showConsentForm() {
-    NSURL *privacyURL = [NSURL URLWithString:@"https://www.your.com/privacyurl"];
+    NSURL *privacyURL = NULL;
+    NSString *ns_lang = [[NSString alloc] initWithUTF8String:lang.utf8().get_data()];
+    if ([ns_lang isEqualToString:@"es"])
+        privacyURL = [NSURL URLWithString:@"https://veganodysseythegame.com/es/privacy-policy"];
+    else {
+        privacyURL = [NSURL URLWithString:@"https://veganodysseythegame.com/privacy-policy"];
+    }
+    ViewController *root_controller = (ViewController *)((AppDelegate *)[[UIApplication sharedApplication] delegate]).window.rootViewController;
     form = [[PACConsentForm alloc] initWithApplicationPrivacyPolicyURL:privacyURL];
     form.shouldOfferPersonalizedAds = YES;
     form.shouldOfferNonPersonalizedAds = YES;
@@ -70,7 +76,7 @@ void GodotAdmob::showConsentForm() {
         if (error) {
             NSLog(@"Some error loading the form (Consent)");
         } else {
-            [form presentFromViewController:self
+            [form presentFromViewController:root_controller
                 dismissCompletion:^(NSError *_Nullable error, BOOL userPrefersAdFree) {
                 if (error) {
                     NSLog(@"Some error showing the form (Consent)");
@@ -78,7 +84,7 @@ void GodotAdmob::showConsentForm() {
                     NSLog(@"Prefers ad free (Consent)");
                 } else {
                     // Check the user's consent choice.
-                    PACConsentStatus *status = PACConsentInformation.sharedInstance.consentStatus;
+                    PACConsentStatus status = PACConsentInformation.sharedInstance.consentStatus;
                 }
             }];
         }
