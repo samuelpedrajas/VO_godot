@@ -11,9 +11,12 @@
 // typedef AdmobBanner *bannerPtr;
 @class AdmobRewarded;
 typedef AdmobRewarded *rewardedPtr;
+@class PACConsentForm;
+typedef PACConsentForm *formPtr;
 #else
 typedef void *bannerPtr;
 typedef void *rewardedPtr;
+typedef void *formPtr;
 #endif
 
 
@@ -32,8 +35,7 @@ class GodotAdmob : public Reference {
     // bannerPtr banner;
     rewardedPtr rewarded;
     String lang;
-    PACConsentForm *form;
-    
+    formPtr form;
 
 protected:
     static void _bind_methods();
@@ -49,6 +51,8 @@ public:
     // int getBannerHeight();
     void loadRewardedVideo(const String &rewardedId);
     void showRewardedVideo();
+    void requestConsent();
+    void showConsentForm();
 
     GodotAdmob();
     ~GodotAdmob();
