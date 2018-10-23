@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.provider.Settings;
 import android.graphics.Color;
 import android.util.Log;
+import android.os.Bundle;
 import java.util.Locale;
 import android.view.Gravity;
 import android.view.View;
@@ -24,6 +25,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.ads.mediation.admob.AdMobAdapter;
 
 import com.unity3d.ads.metadata.MetaData;
 
@@ -61,11 +63,12 @@ public class GodotAdMob extends Godot.SingletonBase
 		this.instance_id = instance_id;
 		this.lang = lang;
 
-		//MetaData gdprMetaData = new MetaData(activity);
-		//gdprMetaData.set("gdpr.consent", true);
-		//gdprMetaData.commit();
-
 		Log.d("godot", "AdMob: init");
+	}
+
+
+	private boolean isRequestLocationInEeaOrUnknown() {
+		return ConsentInformation.getInstance(activity).isRequestLocationInEeaOrUnknown();
 	}
 
 
@@ -94,7 +97,7 @@ public class GodotAdMob extends Godot.SingletonBase
 				ConsentInformation consentInformation = ConsentInformation.getInstance(activity);
 
 				// test!!!!!!!!!!!!!
-				consentInformation.addTestDevice("2A5096EECA8734236D655A85D1B05BA3");
+				//consentInformation.addTestDevice("2A5096EECA8734236D655A85D1B05BA3");
 
 				String[] publisherIds = {"pub-1160358939410189"};
 				consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
@@ -107,11 +110,32 @@ public class GodotAdMob extends Godot.SingletonBase
 					@Override
 					public void onFailedToUpdateConsentInfo(String errorDescription) {
 						Log.w("godotAdmob", "Consent error");
-						GodotLib.calldeferred(instance_id, "_on_consent_failed_to_update", new Object[] { errorDescription });
+						GodotLib.calldeferred(instance_id, "_on_consent_error", new Object[] { errorDescription });
 					}
 				});
 			}
 		});
+	}
+
+
+	public void setConsent(final boolean personalized_ads) {
+		Log.w("godotAdmob", "Setting consent...");
+		if (personalized_ads) {
+			MetaData gdprMetaData = new MetaData(activity);
+			gdprMetaData.set("gdpr.consent", true);
+			gdprMetaData.commit();
+			ConsentInformation.getInstance(activity)
+				.setConsentStatus(ConsentStatus.PERSONALIZED);
+
+		} else {
+			MetaData gdprMetaData = new MetaData(activity);
+			gdprMetaData.set("gdpr.consent", false);
+			gdprMetaData.commit();
+			ConsentInformation.getInstance(activity)
+				.setConsentStatus(ConsentStatus.NON_PERSONALIZED);
+
+		}
+
 	}
 
 
@@ -155,7 +179,7 @@ public class GodotAdMob extends Godot.SingletonBase
 						@Override
 						public void onConsentFormError(String errorDescription) {
 							Log.w("godotAdmob", errorDescription);
-							GodotLib.calldeferred(instance_id, "_on_consent_form_error", new Object[] { errorDescription });
+							GodotLib.calldeferred(instance_id, "_on_consent_error", new Object[] { errorDescription });
 						}
 					})
 					.withPersonalizedAdsOption()
@@ -255,7 +279,7 @@ public class GodotAdMob extends Godot.SingletonBase
 	 * Load a Rewarded Video
 	 * @param String id AdMod Rewarded video ID
 	 */
-	public void loadRewardedVideo(final String id) {
+	public void loadRewardedVideo(final String id, final boolean personalized_ads) {
 		activity.runOnUiThread(new Runnable()
 		{
 			@Override public void run()
@@ -267,13 +291,28 @@ public class GodotAdMob extends Godot.SingletonBase
 				if (!rewardedVideoAd.isLoaded() && !isLoading) {
 					isLoading = true;
 					AdRequest.Builder adBuilder = new AdRequest.Builder();
+
 					adBuilder.tagForChildDirectedTreatment(true);
 					if (!isReal) {
+						Log.w("godot", "AdMob: requesting not real ad");
 						adBuilder.addTestDevice("2A5096EECA8734236D655A85D1B05BA3");
 						adBuilder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
 						adBuilder.addTestDevice(getAdmobDeviceId());
 					}
-					rewardedVideoAd.loadAd(id, adBuilder.build());
+					if (!personalized_ads) {
+						Log.w("godot", "AdMob: requesting non personalized ad");
+						Bundle extras = new Bundle();
+						extras.putString("npa", "1");
+
+						rewardedVideoAd.loadAd(id,
+							adBuilder.addNetworkExtrasBundle(
+								AdMobAdapter.class, extras
+							).build()
+						);
+					} else {
+						Log.w("godot", "AdMob: requesting personalized ad");
+						rewardedVideoAd.loadAd(id, adBuilder.build());
+					}
 				}
 			}
 		});
@@ -356,7 +395,8 @@ public class GodotAdMob extends Godot.SingletonBase
 	public GodotAdMob(Activity p_activity) {
 		registerClass("AdMob", new String[] {
 			"init", "loadRewardedVideo", "showRewardedVideo",
-			"requestConsent", "loadConsentForm", "showConsentForm"
+			"requestConsent", "loadConsentForm", "showConsentForm",
+			"isRequestLocationInEeaOrUnknown", "setConsent"
 		});
 		activity = p_activity;
 	}
