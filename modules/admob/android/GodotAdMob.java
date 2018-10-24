@@ -48,7 +48,6 @@ public class GodotAdMob extends Godot.SingletonBase
 
 	private RewardedVideoAd rewardedVideoAd = null; // Rewarded Video object
 	private ConsentForm form = null;
-	private String lang = "en";
 
 	/* Init
 	 * ********************************************************************** */
@@ -57,11 +56,10 @@ public class GodotAdMob extends Godot.SingletonBase
 	 * Prepare for work with AdMob
 	 * @param boolean isReal Tell if the enviroment is for real or test
 	 */
-	public void init(boolean isReal, int instance_id, String lang)
+	public void init(boolean isReal, int instance_id)
 	{
 		this.isReal = isReal;
 		this.instance_id = instance_id;
-		this.lang = lang;
 
 		Log.d("godot", "AdMob: init");
 	}
@@ -139,7 +137,7 @@ public class GodotAdMob extends Godot.SingletonBase
 	}
 
 
-	public void loadConsentForm() {
+	public void loadConsentForm(final String lang) {
 		activity.runOnUiThread(new Runnable()
 		{
 			@Override public void run()
