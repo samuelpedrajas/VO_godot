@@ -23,7 +23,7 @@ GodotAdmob::~GodotAdmob() {
 }
 
 
-void GodotAdmob::init(bool isReal, int instanceId, String _lang) {
+void GodotAdmob::init(bool isReal, int instanceId) {
     if (initialized) {
         NSLog(@"GodotAdmob Module already initialized");
         return;
@@ -31,17 +31,17 @@ void GodotAdmob::init(bool isReal, int instanceId, String _lang) {
     NSLog(@"Initialising GodotAdmob Module");
     initialized = true;
     instance = this;
-    lang = _lang;
     obj = ObjectDB::get_instance(instanceId);
 
     [GADMobileAds configureWithApplicationID:@"ca-app-pub-1160358939410189~8221472002"];
 
-    //UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
-    //[gdprConsentMetaData set:@"gdpr.consent" value:@YES];
-    //[gdprConsentMetaData commit];
-
     rewarded = [AdmobRewarded alloc];
     [rewarded initialize:isReal :instanceId];
+}
+
+
+bool GodotAdmob::isRequestLocationInEeaOrUnknown() {
+    return PACConsentInformation.sharedInstance.requestLocationInEEAOrUnknown;
 }
 
 
@@ -69,7 +69,7 @@ void GodotAdmob::requestConsent() {
         completionHandler:^(NSError *_Nullable error) {
             if (error) {
                 NSLog(@"Some error requesting consent");
-                obj->call_deferred("_on_consent_failed_to_update", "error while requesting consent");
+                obj->call_deferred("_on_consent_error", "error while requesting consent");
             } else {
                 PACConsentStatus consentStatus =
                     PACConsentInformation.sharedInstance.consentStatus;
@@ -81,7 +81,23 @@ void GodotAdmob::requestConsent() {
 }
 
 
-void GodotAdmob::loadConsentForm() {
+void GodotAdmob::setConsent(bool personalized_ads) {
+    NSLog(@"Setting consent...");
+    if (personalized_ads) {
+        UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
+        [gdprConsentMetaData set:@"gdpr.consent" value:@YES];
+        [gdprConsentMetaData commit];
+        PACConsentInformation.sharedInstance.consentStatus = PACConsentStatusPersonalized;
+    } else {
+        UADSMetaData *gdprConsentMetaData = [[UADSMetaData alloc] init];
+        [gdprConsentMetaData set:@"gdpr.consent" value:@NO];
+        [gdprConsentMetaData commit];
+        PACConsentInformation.sharedInstance.consentStatus = PACConsentStatusNonPersonalized;
+    }
+}
+
+
+void GodotAdmob::loadConsentForm(String lang) {
     NSURL *privacyURL = NULL;
     NSString *ns_lang = [[NSString alloc] initWithUTF8String:lang.utf8().get_data()];
     if ([ns_lang isEqualToString:@"es"])
@@ -99,8 +115,9 @@ void GodotAdmob::loadConsentForm() {
         NSLog(@"Load complete. Error: %@", error);
         if (error) {
             NSLog(@"Some error loading the form (Consent)");
-            obj->call_deferred("_on_consent_form_error", "error while loading the consent request");
+            obj->call_deferred("_on_consent_error", "error while loading the consent request");
         } else {
+            NSLog(@"Consent form loaded");
             obj->call_deferred("_on_consent_form_loaded");
         }
     }];
@@ -114,8 +131,9 @@ void GodotAdmob::showConsentForm() {
         if (error) {
             NSLog(@"Some error showing the form (Consent)");
 
-            obj->call_deferred("_on_consent_form_error", "error while showing consent form");
+            obj->call_deferred("_on_consent_error", "error while showing consent form");
         } else {
+            NSLog(@"Consent form closed");
             PACConsentStatus consentStatus =
                 PACConsentInformation.sharedInstance.consentStatus;
             String status = getConsentStatus(consentStatus);
@@ -126,7 +144,7 @@ void GodotAdmob::showConsentForm() {
 }
 
 
-void GodotAdmob::loadRewardedVideo(const String &rewardedId) {
+void GodotAdmob::loadRewardedVideo(const String &rewardedId, bool personalized_ads) {
     //init
     if (!initialized) {
         NSLog(@"GodotAdmob Module not initialized");
@@ -134,7 +152,7 @@ void GodotAdmob::loadRewardedVideo(const String &rewardedId) {
     }
 
     NSString *idStr = [NSString stringWithCString:rewardedId.utf8().get_data() encoding: NSUTF8StringEncoding];
-    [rewarded loadRewardedVideo: idStr];
+    [rewarded loadRewardedVideo:idStr :personalized_ads];
 }
 
 
@@ -157,4 +175,6 @@ void GodotAdmob::_bind_methods() {
     CLASS_DB::bind_method("requestConsent",&GodotAdmob::requestConsent);
     CLASS_DB::bind_method("loadConsentForm",&GodotAdmob::loadConsentForm);
     CLASS_DB::bind_method("showConsentForm",&GodotAdmob::showConsentForm);
+    CLASS_DB::bind_method("setConsent",&GodotAdmob::setConsent);
+    CLASS_DB::bind_method("isRequestLocationInEeaOrUnknown",&GodotAdmob::isRequestLocationInEeaOrUnknown);
 }

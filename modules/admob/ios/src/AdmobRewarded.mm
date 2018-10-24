@@ -1,6 +1,7 @@
 #import "AdmobRewarded.h"
 #import <GoogleMobileAds/GADRewardBasedVideoAd.h>
 #import <GoogleMobileAds/GADAdReward.h>
+#import <GoogleMobileAds/GADExtras.h>
 
 
 @implementation AdmobRewarded
@@ -15,7 +16,7 @@
     obj = ObjectDB::get_instance(instanceId);
 }
 
-- (void) loadRewardedVideo:(NSString*) rewardedId {
+- (void) loadRewardedVideo:(NSString*) rewardedId: (bool)personalized_ads {
     NSLog(@"Calling loadRewardedVideo");
     //init
     if (!initialized || [[GADRewardBasedVideoAd sharedInstance] isReady] || isLoading) {
@@ -25,6 +26,15 @@
     [GADRewardBasedVideoAd sharedInstance].delegate = self;
 
     GADRequest *request = [GADRequest request];
+
+    if (personalized_ads) {
+        NSLog(@"Requesting personalized ads");
+    } else {
+        NSLog(@"Requesting non personalized ads");
+        GADExtras *extras = [[GADExtras alloc] init];
+        extras.additionalParameters = @{@"npa": @"1"};
+        [request registerAdNetworkExtras:extras];
+    }
 
     if(!isReal) {
         request.testDevices = [NSArray arrayWithObjects:kGADSimulatorID, @"C7F22689DFF0EF8E76C5F5DD35CB6995", @"c7f22689dff0ef8e76c5f5dd35cb6995", nil];
@@ -45,7 +55,7 @@
     if ([[GADRewardBasedVideoAd sharedInstance] isReady]) {
         [[GADRewardBasedVideoAd sharedInstance] presentFromRootViewController:rootController];
     }
-    
+
 }
 
 

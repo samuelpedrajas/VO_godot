@@ -34,7 +34,6 @@ class GodotAdmob : public Reference {
     
     // bannerPtr banner;
     rewardedPtr rewarded;
-    String lang;
     formPtr form;
     Object *obj;
 
@@ -43,17 +42,19 @@ protected:
 
 public:
 
-    void init(bool isReal, int instanceId, String lang);
+    void init(bool isReal, int instanceId);
     // void loadBanner(const String &bannerId, bool isOnTop);
     // void showBanner();
     // void hideBanner();
     // void resize();
     // int getBannerWidth();
     // int getBannerHeight();
-    void loadRewardedVideo(const String &rewardedId);
+    bool isRequestLocationInEeaOrUnknown();
+    void setConsent(bool personalized_ads);
+    void loadRewardedVideo(const String &rewardedId, bool personalized_ads);
     void showRewardedVideo();
     void requestConsent();
-    void loadConsentForm();
+    void loadConsentForm(String _lang);
     void showConsentForm();
 
     GodotAdmob();
