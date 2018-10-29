@@ -94,7 +94,9 @@ void InAppStore::_bind_methods() {
 
 	for (int i = 0; i < [products count]; i++) {
 
-		SKProduct *product = [products objectAtIndex:i];
+		SKProduct *product = [[products objectAtIndex:i] retain];
+
+		InAppStore::get_singleton()->setProduct(product);
 
 		const char *str = [product.localizedTitle UTF8String];
 		titles.push_back(String::utf8(str != NULL ? str : ""));
@@ -120,6 +122,20 @@ void InAppStore::_bind_methods() {
 		invalid_ids.push_back(String::utf8([ipid UTF8String]));
 	};
 	ret["invalid_ids"] = invalid_ids;
+
+	InAppStore::get_singleton()->_post_event(ret);
+
+	[request release];
+};
+
+
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error {
+	printf("Fail to make the products request!");
+
+	Dictionary ret;
+	ret["type"] = "product_info";
+	ret["result"] = "error";
+	ret["error"] = String::utf8([error.localizedDescription UTF8String]);
 
 	InAppStore::get_singleton()->_post_event(ret);
 
@@ -206,11 +222,11 @@ Error InAppStore::restore_purchases() {
 						// which is still available in iOS 7.
 
 						// Use SKPaymentTransaction's transactionReceipt.
-						receipt = transaction.transactionReceipt;
+						receipt = [NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]];
 					}
 
 				} else {
-					receipt = transaction.transactionReceipt;
+					receipt = [NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]];
 				}
 
 				NSString *receipt_to_send = nil;
@@ -260,26 +276,55 @@ Error InAppStore::restore_purchases() {
 	};
 };
 
+- (void)paymentQueue:(SKPaymentQueue *)queue
+restoreCompletedTransactionsFailedWithError:(NSError *)error {
+	printf("paymentQueue restoreCompletedTransactionsFailedWithError\n");
+
+	Dictionary ret;
+	ret["type"] = "restore";
+	ret["result"] = "error";
+	ret["error"] = String::utf8([error.localizedDescription UTF8String]);
+
+	InAppStore::get_singleton()->_post_event(ret);
+};
+
+- (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue {
+	if ([[queue transactions] count] == 0) {
+		Dictionary ret;
+		ret["type"] = "restore";
+		ret["result"] = "fail";
+		ret["msg"] = "No products to restore";
+
+		InAppStore::get_singleton()->_post_event(ret);
+	}
+};
+
+- (BOOL)paymentQueue:(SKPaymentQueue *)queue shouldAddStorePayment:(SKPayment *)payment
+		forProduct:(SKProduct *)product {
+	return true;
+};
+
 @end
 
-Error InAppStore::purchase(Variant p_params) {
+Error InAppStore::purchase() {
 
 	ERR_FAIL_COND_V(![SKPaymentQueue canMakePayments], ERR_UNAVAILABLE);
 	if (![SKPaymentQueue canMakePayments])
 		return ERR_UNAVAILABLE;
 
 	printf("purchasing!\n");
-	Dictionary params = p_params;
-	ERR_FAIL_COND_V(!params.has("product_id"), ERR_INVALID_PARAMETER);
 
-	NSString *pid = [[[NSString alloc] initWithUTF8String:String(params["product_id"]).utf8().get_data()] autorelease];
-	SKPayment *payment = [SKPayment paymentWithProductIdentifier:pid];
+	SKPayment *payment = [SKPayment paymentWithProduct:_product];
 	SKPaymentQueue *defq = [SKPaymentQueue defaultQueue];
 	[defq addPayment:payment];
 	printf("purchase sent!\n");
 
 	return OK;
 };
+
+void InAppStore::setProduct(SKProduct *product) {
+	_product = product;
+}
 
 int InAppStore::get_pending_event_count() {
 	return pending_events.size();
