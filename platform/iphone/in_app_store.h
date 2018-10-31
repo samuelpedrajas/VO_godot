@@ -38,8 +38,11 @@
 #ifdef __OBJC__
 @class SKProduct;
 typedef SKProduct *skproductPtr;
+@class SKPayment;
+typedef SKPayment *skpaymentPtr;
 #else
 typedef void *skproductPtr;
+typedef void *skpaymentPtr;
 #endif
 
 
@@ -52,12 +55,17 @@ class InAppStore : public Object {
 
 	List<Variant> pending_events;
 	skproductPtr _product;
+	skpaymentPtr _payment;
 
 public:
+
+	bool coming_from_app_store();
+	void setFromAppStore(skproductPtr product, skpaymentPtr payment);
 
 	Error request_product_info(Variant p_params);
 	Error restore_purchases();
 	Error purchase();
+	Error continue_purchase();
 
 	int get_pending_event_count();
 	Variant pop_pending_event();

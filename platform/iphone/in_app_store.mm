@@ -38,6 +38,7 @@ extern "C" {
 };
 
 bool auto_finish_transactions = true;
+bool from_app_store = false;
 NSMutableDictionary *pending_transactions = [NSMutableDictionary dictionary];
 
 @interface SKProduct (LocalizedPrice)
@@ -62,9 +63,11 @@ NSMutableDictionary *pending_transactions = [NSMutableDictionary dictionary];
 InAppStore *InAppStore::instance = NULL;
 
 void InAppStore::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("coming_from_app_store"), &InAppStore::coming_from_app_store);
 	ClassDB::bind_method(D_METHOD("request_product_info"), &InAppStore::request_product_info);
 	ClassDB::bind_method(D_METHOD("restore_purchases"), &InAppStore::restore_purchases);
 	ClassDB::bind_method(D_METHOD("purchase"), &InAppStore::purchase);
+	ClassDB::bind_method(D_METHOD("continue_purchase"), &InAppStore::continue_purchase);
 
 	ClassDB::bind_method(D_METHOD("get_pending_event_count"), &InAppStore::get_pending_event_count);
 	ClassDB::bind_method(D_METHOD("pop_pending_event"), &InAppStore::pop_pending_event);
@@ -292,7 +295,7 @@ restoreCompletedTransactionsFailedWithError:(NSError *)error {
 	if ([[queue transactions] count] == 0) {
 		Dictionary ret;
 		ret["type"] = "restore";
-		ret["result"] = "fail";
+		ret["result"] = "error";
 		ret["msg"] = "No products to restore";
 
 		InAppStore::get_singleton()->_post_event(ret);
@@ -301,10 +304,38 @@ restoreCompletedTransactionsFailedWithError:(NSError *)error {
 
 - (BOOL)paymentQueue:(SKPaymentQueue *)queue shouldAddStorePayment:(SKPayment *)payment
 		forProduct:(SKProduct *)product {
-	return true;
+	InAppStore::get_singleton()->setFromAppStore(product, payment);
+	return false;
 };
 
 @end
+
+
+void InAppStore::setFromAppStore(SKProduct *product, SKPayment *payment) {
+	_product = [product retain];
+	_payment = [payment retain];
+	from_app_store = true;
+}
+
+
+Error InAppStore::continue_purchase() {
+	ERR_FAIL_COND_V(![SKPaymentQueue canMakePayments], ERR_UNAVAILABLE);
+	if (![SKPaymentQueue canMakePayments])
+		return ERR_UNAVAILABLE;
+
+	printf("purchasing!\n");
+
+	SKPaymentQueue *defq = [SKPaymentQueue defaultQueue];
+	[defq addPayment:_payment];
+	printf("purchase sent!\n");
+
+	return OK;
+}
+
+
+bool InAppStore::coming_from_app_store() {
+	return from_app_store;
+}
 
 Error InAppStore::purchase() {
 
