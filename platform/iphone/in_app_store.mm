@@ -295,7 +295,7 @@ restoreCompletedTransactionsFailedWithError:(NSError *)error {
 	if ([[queue transactions] count] == 0) {
 		Dictionary ret;
 		ret["type"] = "restore";
-		ret["result"] = "error";
+		ret["result"] = "not_owned";
 		ret["msg"] = "No products to restore";
 
 		InAppStore::get_singleton()->_post_event(ret);
