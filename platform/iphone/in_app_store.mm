@@ -249,6 +249,18 @@ Error InAppStore::restore_purchases() {
 					[pending_transactions setObject:transaction forKey:transaction.payment.productIdentifier];
 				}
 
+				// update app store promotion visibility
+				if (@available(iOS 11.0, *)) {
+					SKProduct* product = InAppStore::get_singleton()->getProduct();
+					[[SKProductStorePromotionController defaultController] updateStorePromotionVisibility:SKProductStorePromotionVisibilityHide forProduct:product completionHandler:^(NSError * _Nullable error) {
+						if(error != nil) {
+							NSLog(@"Update store promotion visibility failed with error: %@", [error description]);
+						} else {
+							NSLog(@"Success");
+						}
+					}];
+				}
+
 			}; break;
 			case SKPaymentTransactionStateFailed: {
 				printf("status transaction failed!\n");
@@ -315,6 +327,11 @@ void InAppStore::setFromAppStore(SKProduct *product, SKPayment *payment) {
 	_product = [product retain];
 	_payment = [payment retain];
 	from_app_store = true;
+}
+
+
+SKProduct *InAppStore::getProduct() {
+	return _product;
 }
 
 

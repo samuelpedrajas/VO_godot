@@ -72,6 +72,7 @@ public:
 	void finish_transaction(String product_id);
 	void set_auto_finish_transaction(bool b);
 	void setProduct(skproductPtr product);
+	skproductPtr getProduct();
 
 	void _post_event(Variant p_event);
 	void _record_purchase(String product_id);
